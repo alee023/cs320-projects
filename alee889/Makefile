@@ -1,7 +1,7 @@
 CC=gcc
 
-test: test.c
-	$(CC) -o test test.c 
+test: test.cpp
+	$(CC) -o test test.cpp
 
 clean:
 	rm -f test.o
