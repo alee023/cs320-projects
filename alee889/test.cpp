@@ -25,5 +25,7 @@ int main( int argc, char *argv[]) {
     outfile << "target=" << target << endl;
   }
 
+  infile.close() ;
+  outfile.close() ;
   return 0;
 }
