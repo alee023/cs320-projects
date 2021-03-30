@@ -1,4 +1,4 @@
-CC=gcc
+CC=g++
 CXXFLAGS='-D_GLIBCXX_USE_CXX11_ABI=0'
 
 test: test.cpp
