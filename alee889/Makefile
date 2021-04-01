@@ -1,8 +1,8 @@
 CC=g++
 CXXFLAGS='-D_GLIBCXX_USE_CXX11_ABI=0'
 
-test: test.cpp
-	$(CC) -o test test.cpp
+main: main.cpp
+	$(CC) -o main main.cpp
 
 clean:
-	rm -f test.o output.txt 
+	rm -f main.o output.txt 
