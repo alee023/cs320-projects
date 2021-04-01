@@ -10,14 +10,14 @@ string readFile, writeFile ;
 int numberLines = 0 ;
 
 void AT() { // always taken
-	string behavior, line;
+	string behavior, line, ignore ;
 	int TCounter = 0 ;
 
 	infile.open( readFile ) ;
 	while( getline( infile, line )) {
 		numberLines++ ;
 		stringstream s( line ) ;
-		s >> >> behavior >> ;
+		s >> ignore >> behavior >> ignore ;
 
 		if( behavior == "T" ) {
 			TCounter++ ;
@@ -25,7 +25,7 @@ void AT() { // always taken
 	}
 
 	infile.close() ;
-	outfile.open() ;
+	outfile.open( writeFile ) ;
 	outfile << to_string( TCounter ) + "," + to_string( numberLines ) << endl ;
 	outfile.close() ;
 }
