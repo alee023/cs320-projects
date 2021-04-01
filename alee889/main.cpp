@@ -12,6 +12,7 @@ int numberLines = 0 ;
 void AT() { // always taken
 	string behavior, line, ignore ;
 	int TCounter = 0 ;
+	int NTCounter = 0 ;
 
 	infile.open( readFile ) ;
 	while( getline( infile, line )) {
@@ -22,11 +23,15 @@ void AT() { // always taken
 		if( behavior == "T" ) {
 			TCounter++ ;
 		}
+		else if( behavior == "NT" ) {
+			NTCounter++ ;
+		}
 	}
 
 	infile.close() ;
 	outfile.open( writeFile ) ;
 	outfile << to_string( TCounter ) + "," + to_string( numberLines ) << endl ;
+	outfile << to_string( NTCounter ) + "," + to_string( numberLines ) << endl ;
 	outfile.close() ;
 }
 
