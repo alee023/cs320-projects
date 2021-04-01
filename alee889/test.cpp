@@ -4,28 +4,58 @@
 #include<string>
 
 using namespace std;
+ifstream infile ;
+ofstream outfile ;
+string readFile, writeFile ;
+int numberLines = 0 ;
+
+void AT() { // always taken
+	string behavior, line;
+	int TCounter = 0 ;
+
+	infile.open( readFile ) ;
+	while( getline( infile, line )) {
+		numberLines++ ;
+		stringstream s( line ) ;
+		s >> >> behavior >> ;
+
+		if( behavior == "T" ) {
+			TCounter++ ;
+		}
+	}
+
+	infile.close() ;
+	outfile.open() ;
+	outfile << to_string( TCounter ) + "," + to_string( numberLines ) << endl ;
+	outfile.close() ;
+}
 
 int main( int argc, char *argv[]) {
-  unsigned long long addr;
-  string behavior, line;
-  unsigned long long target;
+	unsigned long long addr;
+	string behavior, line;
+	unsigned long long target;
+	readFile = argv[ 1 ] ;
+	writeFile = argv[ 2 ] ;
 
-  ifstream infile( "test_input.txt" );
-  ofstream outfile( "test_output.txt" ) ;
-  while( getline( infile, line )) {
-    stringstream s( line );
-    s >> std::hex >> addr >> behavior >> std::hex >> target;
-    outfile << addr;
-    if(behavior == "T") {
-      outfile << " -> taken, ";
-    } 
-    else {
-      outfile << " -> not taken, ";
-    }
-    outfile << "target=" << target << endl;
-  }
+	/*
+	infile.open( "test_input.txt" );
+	outfile.open( "output.txt" ) ;
 
-  infile.close() ;
-  outfile.close() ;
-  return 0;
+	while( getline( infile, line )) {
+		stringstream s( line );
+		s >> std::hex >> addr >> behavior >> std::hex >> target;
+
+		if(behavior == "T") {
+			outfile << " -> taken, ";
+		} 
+		else {
+			outfile << " -> not taken, ";
+		}
+		outfile << "target=" << target << endl;
+	}
+
+	infile.close() ;
+	outfile.close() ;
+	*/
+	return 0;
 }
