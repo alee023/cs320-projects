@@ -2,10 +2,15 @@
 #include<fstream>
 #include<sstream>
 #include<string>
+#include<map>
+#include<bitset>
+#include<vector>
 
 using namespace std;
 string readFile, writeFile ;
 int numberLines = 0 ;
+map<string, int> one4, one5, one7, one8, one9, one10, one11 ;
+vector< map<string, int>*> oneMaps{ &one4, &one5, &one7, &one8, &one9, &one10, &one11 } ;
 
 void AT() { // always taken
 	string behavior, line, ignore ;
@@ -33,6 +38,46 @@ void AT() { // always taken
 	ofstream outfile( writeFile ) ;
 	outfile << to_string( TCounter ) + "," + to_string( numberLines ) + ";" << endl ;
 	outfile << to_string( NTCounter ) + "," + to_string( numberLines ) + ";" << endl ;
+	outfile.close() ;
+}
+
+void bimodal() {
+	string behavior, line, ignore, binStr ;
+	unsigned long long addr;
+	int correctCounter = 0 ;
+
+	ifstream infile( readFile ) ;
+	while( getline( infile, line )) {
+		numberLines++ ;
+		stringstream s( line ) ;
+		s >> hex >> addr >> behavior >> ignore ;
+		bitset<11> bin11( addr ) ;
+		binStr = bin11.to_string() ;
+
+		for( int i = 0; i < oneMaps.size(); i++ ) {
+			map<string, int> x = *oneMaps[ i ] ;
+			if( !x.count( binStr )) {
+				&x[ binStr ] == 1 ;
+			}
+
+			if( behavior == "T" ) {
+				if( x[ binStr ] == 0 ) {
+					&x[ binStr ] = 1 ;
+				}
+				else correctCounter++ ;
+			}
+			else {
+				if( x[ binStr ] == 0 ) {
+					correctCounter++ ;
+				}
+				else &x[ binStr ] = 1 ;
+			}
+		}
+	}
+
+	infile.close() ;
+	ofstream outfile( writeFile ) ;
+	outfile << to_string( correctCounter ) + "," + to_string( numberLines ) + ";" << endl ;
 	outfile.close() ;
 }
 
