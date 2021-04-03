@@ -52,28 +52,39 @@ void bimodal() {
 		stringstream s( line ) ;
 		s >> hex >> addr >> behavior >> ignore ;
 		bitset<11> bin11( addr ) ;
+		
+		int i = 0 ;
 
-		for( int i = 0; i < 7; i++ ) {
-			bitset<11> binSpecific( addr % correctCounters[ i ]) ;
+		for( map<string, int>* x : oneMaps ) {
+			// cout << to_string( i + 1 ) + ": " << endl ;
+			unsigned addr1 = addr % divisors[ i ] ;
+			bitset<11> binSpecific( addr1 ) ;
 			binStr = binSpecific.to_string() ;
-			map<string, int> x = *(oneMaps[ i ]) ;
-			if( !(x.count( binStr ))) {
-				x[ binStr ] = 1 ;
+			// cout << binStr << endl ;
+
+			if( !(x->count( binStr ))) {
+				(*x)[ binStr ] = 1 ;
+				// cout << "added new" << endl ;
 			}
+	
+			// cout << to_string((*x)[ binStr ]) << endl ;
 
 			if( behavior == "T" ) {
-				if( x[ binStr ] == 0 ) {
-					x[ binStr ] = 1 ;
+				if( (*x)[ binStr ] == 0 ) {
+					(*x)[ binStr ] = 1 ;
 				}
 				else correctCounters[ i ]++ ;
 			}
 			else {
-				if( x[ binStr ] == 0 ) {
+				if( (*x)[ binStr ] == 0 ) {
 					correctCounters[ i ]++ ;
 				}
-				else x[ binStr ] = 1 ;
+				else (*x)[ binStr ] = 0 ;
 			}
+
+			i++ ;
 		}
+		// cout << "--------------------------------" << endl ;
 	}
 
 	infile.close() ;
