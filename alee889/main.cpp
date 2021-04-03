@@ -10,7 +10,9 @@ using namespace std;
 string readFile, writeFile ;
 int numberLines = 0 ;
 map<string, int> one4, one5, one7, one8, one9, one10, one11 ;
+map<string, int> two4, two5, two7, two8, two9, two10, two11 ;
 vector< map<string, int>*> oneMaps{ &one4, &one5, &one7, &one8, &one9, &one10, &one11 } ;
+vector< map<string, int>*> twoMaps{ &two4, &two5, &two7, &two8, &two9, &two10, &two11 } ;
 
 void AT() { // always taken
 	string behavior, line, ignore ;
@@ -44,7 +46,8 @@ void AT() { // always taken
 void bimodal() {
 	string behavior, line, ignore, binStr ;
 	unsigned long long addr;
-	int correctCounters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
+	int correct1Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
+	int correct2Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
 	int divisors[ 7 ] = { 16, 32, 128, 256, 512, 1024, 2048 } ;
 
 	ifstream infile( readFile ) ;
@@ -55,6 +58,7 @@ void bimodal() {
 
 		for( int i = 0; i < 7; i++ ) {
 			map<string, int>* x = oneMaps[ i ] ;
+			map<string, int>* y = twoMaps[ i ] ;
 			// cout << to_string( i + 1 ) + ": " << endl ;
 			bitset<11> binSpecific( addr % divisors[ i ]) ;
 			binStr = binSpecific.to_string() ;
@@ -62,22 +66,50 @@ void bimodal() {
 
 			if( !(x->count( binStr ))) {
 				(*x)[ binStr ] = 1 ;
-				// cout << "added new" << endl ;
+				(*y)[ binStr ] = 1 ;
 			}
 	
 			// cout << to_string((*x)[ binStr ]) << endl ;
 
 			if( behavior == "T" ) {
-				if( (*x)[ binStr ] == 0 ) {
+				if((*x)[ binStr ] == 0 ) {
 					(*x)[ binStr ] = 1 ;
 				}
-				else correctCounters[ i ]++ ;
+				else correct1Counters[ i ]++ ;
+
+				if((*y)[ binStr ] == 0 ) { // 00-SNT
+					(*y)[ binStr ] = 1 ;
+				}
+				else if((*y)[ binStr ] == 1 ) { // 01-NT
+					(*y)[ binStr ] = 10 ;
+				}
+				else if((*y)[ binStr ] == 10 ) { // 10-T
+					(*y)[ binStr ] = 11 ;
+					correct2Counters[ i ]++ ;
+				}
+				else if((*y)[ binStr ] == 11 ) { // 11-ST
+					correct2Counters[ i ]++ ;
+				}
 			}
-			else {
+			else { // behavior is NT
 				if( (*x)[ binStr ] == 0 ) {
-					correctCounters[ i ]++ ;
+					correct1Counters[ i ]++ ;
 				}
 				else (*x)[ binStr ] = 0 ;
+
+				if((*y)[ binStr ] == 0 ) { // 00-SNT
+					correct2Counters[ i ]++ ;
+				}
+				else if((*y)[ binStr ] == 1 ) { // 01-NT
+					(*y)[ binStr ] = 0 ;
+					correct2Counters[ i ]++ ;
+				}
+				else if((*y)[ binStr ] == 10 ) { // 10-T
+					(*y)[ binStr ] = 1 ;
+				}
+				else if((*y)[ binStr ] == 11 ) { // 11-ST
+					(*y)[ binStr ] = 10 ;
+				}
 			}
 		}
 		// cout << "--------------------------------" << endl ;
@@ -87,7 +119,8 @@ void bimodal() {
 	ofstream outfile( writeFile, fstream::app ) ;
 
 	for( int i = 0; i < 7 ; i++ ) {
-		outfile << to_string( correctCounters[ i ]) + "," + to_string( numberLines ) + "; " ;
+		outfile << to_string( correct1Counters[ i ]) + "," + to_string( numberLines ) + "; " ;
+		outfile << to_string( correct2Counters[ i ]) + "," + to_string( numberLines ) + "; " ;
 	}
 	outfile << endl ;
 	outfile.close() ;
