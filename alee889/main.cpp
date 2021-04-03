@@ -17,7 +17,7 @@ vector< unordered_map<unsigned long long, int>*> twoMaps{ &two4, &two5, &two7, &
 
 unordered_map<unsigned long long, int> ghr3, ghr4, ghr5, ghr6, ghr7, ghr8, ghr9, ghr10, ghr11 ;
 vector< unordered_map<unsigned long long, int>*> ghrMaps{ &ghr3, &ghr4, &ghr5, &ghr6, &ghr7, &ghr8, &ghr9, &ghr10, &ghr11 } ;
-vector<bitset<11>> ghrs ;
+unsigned long long ghrs [ 9 ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
 
 void AT() { // always taken
 	string behavior, line, ignore ;
@@ -48,36 +48,64 @@ void AT() { // always taken
 	outfile.close() ;
 }
 
+void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr, string behavior, int[] arr, int i ) {
+	if( behavior == "T" ) {
+		if((*x)[ addr ] == 0 ) { // 00-SNT
+			(*x)[ addr ] = 1 ;
+		}
+		else if((*x)[ addr ] == 1 ) { // 01-NT
+			(*x)[ addr ] = 10 ;
+		}
+		else if((*x)[ addr ] == 10 ) { // 10-T
+			(*x)[ addr ] = 11 ;
+			arr[ i ]++ ;
+		}
+		else if((*x)[ addr ] == 11 ) { // 11-ST
+			arr[ i ]++ ;
+		}
+	}
+	else if( behavior == "NT" ) {
+		if((*x)[ addr ] == 0 ) { // 00-SNT
+			arr[ i ]++ ;
+		}
+		else if((*x)[ addr ] == 1 ) { // 01-NT
+			(*x)[ addr ] = 0 ;
+			arr[ i ]++ ;
+		}
+		else if((*x)[ addr ] == 10 ) { // 10-T
+			(*x)[ addr ] = 1 ;
+		}
+		else if((*x)[ addr ] == 11 ) { // 11-ST
+			(*x)[ addr ] = 10 ;
+		}
+	}
+}
+
 void bimodal() {
-	string behavior, line, ignore, binStr ;
+	string behavior, line, ignore ;
 	unsigned long long addr;
 	int correct1Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
 	int correct2Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
+	int correctGshare [9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
 	int divisors[ 7 ] = { 16, 32, 128, 256, 512, 1024, 2048 } ;
-	int ghrBits[ 9 ] = { 3, 4, 5, 6, 7, 8, 9, 10, 11 } ;
+	int ghrBits[ 9 ] = { 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } ;
 
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
 		stringstream s( line ) ;
 		s >> hex >> addr >> behavior >> ignore ;
-		//bitset<11> bin11( addr ) ;
 		addr %= 2048 ;
 
 		for( int i = 0; i < 7; i++ ) { // i corresponds with index used to access array divisors
-			unordered_map<string, int>* x = oneMaps[ i ] ;
-			unordered_map<string, int>* y = twoMaps[ i ] ;
+			unordered_map<unsigned long long, int>* x = oneMaps[ i ] ;
+			unordered_map<unsigned long long, int>* y = twoMaps[ i ] ;
 			// cout << to_string( i + 1 ) + ": " << endl ;
-			// bitset<11> binSpecific( addr % divisors[ i ]) ; // gets the last divisor[i] bits of addr
-			// binStr = binSpecific.to_string() ;
 			unsigned long long specificAddr = addr % divisors[ i ];
-			// cout << binStr << endl ;
 
 			if( !(x->count( specificAddr ))) {
 				(*x)[ specificAddr ] = 1 ;
 				(*y)[ specificAddr ] = 11 ;
 			}
-	
-			// cout << to_string((*x)[ binStr ]) << endl ;
 
 			if( behavior == "T" ) {
 				if((*x)[ specificAddr ] == 0 ) {
@@ -85,46 +113,42 @@ void bimodal() {
 				}
 				else correct1Counters[ i ]++ ;
 
-				if((*y)[ specificAddr ] == 0 ) { // 00-SNT
-					(*y)[ specificAddr ] = 1 ;
-				}
-				else if((*y)[ specificAddr ] == 1 ) { // 01-NT
-					(*y)[ specificAddr ] = 10 ;
-				}
-				else if((*y)[ specificAddr ] == 10 ) { // 10-T
-					(*y)[ specificAddr ] = 11 ;
-					correct2Counters[ i ]++ ;
-				}
-				else if((*y)[ specificAddr ] == 11 ) { // 11-ST
-					correct2Counters[ i ]++ ;
-				}
+				setMaps( y, specificAddr, "T", correct2Counters, i ) ;
 			}
+
 			else { // behavior is NT
 				if( (*x)[ specificAddr ] == 0 ) {
 					correct1Counters[ i ]++ ;
 				}
 				else (*x)[ specificAddr ] = 0 ;
 
-				if((*y)[ specificAddr ] == 0 ) { // 00-SNT
-					correct2Counters[ i ]++ ;
-				}
-				else if((*y)[ specificAddr ] == 1 ) { // 01-NT
-					(*y)[ specificAddr ] = 0 ;
-					correct2Counters[ i ]++ ;
-				}
-				else if((*y)[ specificAddr ] == 10 ) { // 10-T
-					(*y)[ specificAddr ] = 1 ;
-				}
-				else if((*y)[ specificAddr ] == 11 ) { // 11-ST
-					(*y)[ specificAddr ] = 10 ;
-				}
+				setMaps( y, specificAddr, "NT", correct2Counters, i ) ;
 			}
-
+			/*
 			if( i == 6 ) { // gshare
-				
+				for( int j = 0; j < 9; j++ ) { // for each 9 ghrs
+					unsigned long long xorAddr = specificAddr ^ ghrs[ j ] ;
+					unordered_map<unsigned long long, int>* gShareTable = ghrMaps[ j ] ;
+
+					if( !(gShareTable->count( xorAddr ))) {
+						(*gShareTable)[ xorAddr ] = 11 ;
+					}
+
+					if( behavior == "T" ) {
+						// update GHR
+						ghrs[ j ] <<= 1 ; // shift by 1
+						ghrs[ j ] |= 1 ; // add 1
+						ghrs[ j ] %= ghrBits[ j ] ;
+					}
+					else { // NT
+						// update GHR
+						ghrs[ j ] <<= 1 ; // shift by 1
+						ghrs[ j ] %= ghrBits[ j ] ;
+					}
+				}
 			}
+			*/
 		}
-		// cout << "--------------------------------" << endl ;
 	}
 
 	infile.close() ;
