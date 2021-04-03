@@ -45,16 +45,17 @@ void bimodal() {
 	string behavior, line, ignore, binStr ;
 	unsigned long long addr;
 	int correctCounters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
-
+	int divisors[ 7 ] = { 16, 32, 128, 256, 512, 1024, 2048 } ;
 
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
 		stringstream s( line ) ;
 		s >> hex >> addr >> behavior >> ignore ;
 		bitset<11> bin11( addr ) ;
-		binStr = bin11.to_string() ;
 
 		for( int i = 0; i < 7; i++ ) {
+			bitset<11> binSpecific( addr % correctCounters[ i ]) ;
+			binStr = binSpecific.to_string() ;
 			map<string, int> x = *(oneMaps[ i ]) ;
 			if( !(x.count( binStr ))) {
 				x[ binStr ] = 1 ;
