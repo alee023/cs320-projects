@@ -2,17 +2,18 @@
 #include<fstream>
 #include<sstream>
 #include<string>
-#include<map>
+#include<unordered_map>
 #include<bitset>
 #include<vector>
 
 using namespace std;
 string readFile, writeFile ;
 int numberLines = 0 ;
-map<string, int> one4, one5, one7, one8, one9, one10, one11 ;
-map<string, int> two4, two5, two7, two8, two9, two10, two11 ;
-vector< map<string, int>*> oneMaps{ &one4, &one5, &one7, &one8, &one9, &one10, &one11 } ;
-vector< map<string, int>*> twoMaps{ &two4, &two5, &two7, &two8, &two9, &two10, &two11 } ;
+unordered_map<string, int> one4, one5, one7, one8, one9, one10, one11 ;
+unordered_map<string, int> two4, two5, two7, two8, two9, two10, two11 ;
+vector< unordered_map<string, int>*> oneMaps{ &one4, &one5, &one7, &one8, &one9, &one10, &one11 } ;
+vector< unordered_map<string, int>*> twoMaps{ &two4, &two5, &two7, &two8, &two9, &two10, &two11 } ;
+
 
 void AT() { // always taken
 	string behavior, line, ignore ;
@@ -110,6 +111,10 @@ void bimodal() {
 				else if((*y)[ binStr ] == 11 ) { // 11-ST
 					(*y)[ binStr ] = 10 ;
 				}
+			}
+
+			if( i == 6 ) {
+				// gshare
 			}
 		}
 		// cout << "--------------------------------" << endl ;
