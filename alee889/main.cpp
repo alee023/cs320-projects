@@ -48,7 +48,7 @@ void AT() { // always taken
 	outfile.close() ;
 }
 
-void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr, string behavior, int[] arr, int i ) {
+void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr, string behavior, int* arr, int i ) {
 	if( behavior == "T" ) {
 		if((*x)[ addr ] == 0 ) { // 00-SNT
 			(*x)[ addr ] = 1 ;
@@ -113,7 +113,7 @@ void bimodal() {
 				}
 				else correct1Counters[ i ]++ ;
 
-				setMaps( y, specificAddr, "T", correct2Counters, i ) ;
+				setMaps( y, specificAddr, behavior, correct2Counters, i ) ;
 			}
 
 			else { // behavior is NT
@@ -122,7 +122,7 @@ void bimodal() {
 				}
 				else (*x)[ specificAddr ] = 0 ;
 
-				setMaps( y, specificAddr, "NT", correct2Counters, i ) ;
+				setMaps( y, specificAddr, behavior, correct2Counters, i ) ;
 			}
 			/*
 			if( i == 6 ) { // gshare
