@@ -66,7 +66,7 @@ void bimodal() {
 
 			if( !(x->count( binStr ))) {
 				(*x)[ binStr ] = 1 ;
-				(*y)[ binStr ] = 1 ;
+				(*y)[ binStr ] = 11 ;
 			}
 	
 			// cout << to_string((*x)[ binStr ]) << endl ;
@@ -120,8 +120,12 @@ void bimodal() {
 
 	for( int i = 0; i < 7 ; i++ ) {
 		outfile << to_string( correct1Counters[ i ]) + "," + to_string( numberLines ) + "; " ;
+	}
+	outfile << endl ;
+	for( int i = 0; i < 7 ; i++ ) {
 		outfile << to_string( correct2Counters[ i ]) + "," + to_string( numberLines ) + "; " ;
 	}
+
 	outfile << endl ;
 	outfile.close() ;
 }
