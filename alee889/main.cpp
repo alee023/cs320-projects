@@ -113,18 +113,15 @@ void bimodal() {
 				}
 				else correct1Counters[ i ]++ ;
 
-				setMaps( y, specificAddr, behavior, correct2Counters, i ) ;
 			}
-
 			else { // behavior is NT
 				if( (*x)[ specificAddr ] == 0 ) {
 					correct1Counters[ i ]++ ;
 				}
 				else (*x)[ specificAddr ] = 0 ;
-
-				setMaps( y, specificAddr, behavior, correct2Counters, i ) ;
 			}
-			/*
+			setMaps( y, specificAddr, behavior, correct2Counters, i ) ; // set 2 bit table
+			
 			if( i == 6 ) { // gshare
 				for( int j = 0; j < 9; j++ ) { // for each 9 ghrs
 					unsigned long long xorAddr = specificAddr ^ ghrs[ j ] ;
@@ -134,6 +131,7 @@ void bimodal() {
 						(*gShareTable)[ xorAddr ] = 11 ;
 					}
 
+					setMaps( gShareTable, xorAddr, behavior, correctGshare, j ) ;
 					if( behavior == "T" ) {
 						// update GHR
 						ghrs[ j ] <<= 1 ; // shift by 1
@@ -147,7 +145,7 @@ void bimodal() {
 					}
 				}
 			}
-			*/
+			
 		}
 	}
 
