@@ -44,40 +44,44 @@ void AT() { // always taken
 void bimodal() {
 	string behavior, line, ignore, binStr ;
 	unsigned long long addr;
-	int correctCounter = 0 ;
+	int correctCounters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
+
 
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
-		numberLines++ ;
 		stringstream s( line ) ;
 		s >> hex >> addr >> behavior >> ignore ;
 		bitset<11> bin11( addr ) ;
 		binStr = bin11.to_string() ;
 
-		for( int i = 0; i < oneMaps.size(); i++ ) {
-			map<string, int> x = *oneMaps[ i ] ;
-			if( !x.count( binStr )) {
-				&x[ binStr ] == 1 ;
+		for( int i = 0; i < 7; i++ ) {
+			map<string, int> x = *(oneMaps[ i ]) ;
+			if( !(x.count( binStr ))) {
+				x[ binStr ] = 1 ;
 			}
 
 			if( behavior == "T" ) {
 				if( x[ binStr ] == 0 ) {
-					&x[ binStr ] = 1 ;
+					x[ binStr ] = 1 ;
 				}
-				else correctCounter++ ;
+				else correctCounters[ i ]++ ;
 			}
 			else {
 				if( x[ binStr ] == 0 ) {
-					correctCounter++ ;
+					correctCounters[ i ]++ ;
 				}
-				else &x[ binStr ] = 1 ;
+				else x[ binStr ] = 1 ;
 			}
 		}
 	}
 
 	infile.close() ;
-	ofstream outfile( writeFile ) ;
-	outfile << to_string( correctCounter ) + "," + to_string( numberLines ) + ";" << endl ;
+	ofstream outfile( writeFile, fstream::app ) ;
+
+	for( int i = 0; i < 7 ; i++ ) {
+		outfile << to_string( correctCounters[ i ]) + "," + to_string( numberLines ) + "; " ;
+	}
+	outfile << endl ;
 	outfile.close() ;
 }
 
@@ -89,6 +93,7 @@ int main( int argc, char *argv[]) {
 	writeFile = argv[ 2 ] ;
 
 	AT() ;
+	bimodal() ;
 
 	/*
 	infile.open( "test_input.txt" );
