@@ -58,8 +58,8 @@ void bimodal() {
 		bitset<11> bin11( addr ) ;
 
 		for( int i = 0; i < 7; i++ ) {
-			map<string, int>* x = oneMaps[ i ] ;
-			map<string, int>* y = twoMaps[ i ] ;
+			unordered_map<string, int>* x = oneMaps[ i ] ;
+			unordered_map<string, int>* y = twoMaps[ i ] ;
 			// cout << to_string( i + 1 ) + ": " << endl ;
 			bitset<11> binSpecific( addr % divisors[ i ]) ;
 			binStr = binSpecific.to_string() ;
