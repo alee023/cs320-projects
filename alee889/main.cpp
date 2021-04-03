@@ -9,11 +9,15 @@
 using namespace std;
 string readFile, writeFile ;
 int numberLines = 0 ;
-unordered_map<string, int> one4, one5, one7, one8, one9, one10, one11 ;
-unordered_map<string, int> two4, two5, two7, two8, two9, two10, two11 ;
-vector< unordered_map<string, int>*> oneMaps{ &one4, &one5, &one7, &one8, &one9, &one10, &one11 } ;
-vector< unordered_map<string, int>*> twoMaps{ &two4, &two5, &two7, &two8, &two9, &two10, &two11 } ;
 
+unordered_map<unsigned long long, int> one4, one5, one7, one8, one9, one10, one11 ;
+unordered_map<unsigned long long, int> two4, two5, two7, two8, two9, two10, two11 ;
+vector< unordered_map<unsigned long long, int>*> oneMaps{ &one4, &one5, &one7, &one8, &one9, &one10, &one11 } ;
+vector< unordered_map<unsigned long long, int>*> twoMaps{ &two4, &two5, &two7, &two8, &two9, &two10, &two11 } ;
+
+unordered_map<unsigned long long, int> ghr3, ghr4, ghr5, ghr6, ghr7, ghr8, ghr9, ghr10, ghr11 ;
+vector< unordered_map<unsigned long long, int>*> ghrMaps{ &ghr3, &ghr4, &ghr5, &ghr6, &ghr7, &ghr8, &ghr9, &ghr10, &ghr11 } ;
+vector<bitset<11>> ghrs ;
 
 void AT() { // always taken
 	string behavior, line, ignore ;
@@ -50,71 +54,74 @@ void bimodal() {
 	int correct1Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
 	int correct2Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
 	int divisors[ 7 ] = { 16, 32, 128, 256, 512, 1024, 2048 } ;
+	int ghrBits[ 9 ] = { 3, 4, 5, 6, 7, 8, 9, 10, 11 } ;
 
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
 		stringstream s( line ) ;
 		s >> hex >> addr >> behavior >> ignore ;
-		bitset<11> bin11( addr ) ;
+		//bitset<11> bin11( addr ) ;
+		addr %= 2048 ;
 
-		for( int i = 0; i < 7; i++ ) {
+		for( int i = 0; i < 7; i++ ) { // i corresponds with index used to access array divisors
 			unordered_map<string, int>* x = oneMaps[ i ] ;
 			unordered_map<string, int>* y = twoMaps[ i ] ;
 			// cout << to_string( i + 1 ) + ": " << endl ;
-			bitset<11> binSpecific( addr % divisors[ i ]) ;
-			binStr = binSpecific.to_string() ;
+			// bitset<11> binSpecific( addr % divisors[ i ]) ; // gets the last divisor[i] bits of addr
+			// binStr = binSpecific.to_string() ;
+			unsigned long long specificAddr = addr % divisors[ i ];
 			// cout << binStr << endl ;
 
-			if( !(x->count( binStr ))) {
-				(*x)[ binStr ] = 1 ;
-				(*y)[ binStr ] = 11 ;
+			if( !(x->count( specificAddr ))) {
+				(*x)[ specificAddr ] = 1 ;
+				(*y)[ specificAddr ] = 11 ;
 			}
 	
 			// cout << to_string((*x)[ binStr ]) << endl ;
 
 			if( behavior == "T" ) {
-				if((*x)[ binStr ] == 0 ) {
-					(*x)[ binStr ] = 1 ;
+				if((*x)[ specificAddr ] == 0 ) {
+					(*x)[ specificAddr ] = 1 ;
 				}
 				else correct1Counters[ i ]++ ;
 
-				if((*y)[ binStr ] == 0 ) { // 00-SNT
-					(*y)[ binStr ] = 1 ;
+				if((*y)[ specificAddr ] == 0 ) { // 00-SNT
+					(*y)[ specificAddr ] = 1 ;
 				}
-				else if((*y)[ binStr ] == 1 ) { // 01-NT
-					(*y)[ binStr ] = 10 ;
+				else if((*y)[ specificAddr ] == 1 ) { // 01-NT
+					(*y)[ specificAddr ] = 10 ;
 				}
-				else if((*y)[ binStr ] == 10 ) { // 10-T
-					(*y)[ binStr ] = 11 ;
+				else if((*y)[ specificAddr ] == 10 ) { // 10-T
+					(*y)[ specificAddr ] = 11 ;
 					correct2Counters[ i ]++ ;
 				}
-				else if((*y)[ binStr ] == 11 ) { // 11-ST
+				else if((*y)[ specificAddr ] == 11 ) { // 11-ST
 					correct2Counters[ i ]++ ;
 				}
 			}
 			else { // behavior is NT
-				if( (*x)[ binStr ] == 0 ) {
+				if( (*x)[ specificAddr ] == 0 ) {
 					correct1Counters[ i ]++ ;
 				}
-				else (*x)[ binStr ] = 0 ;
+				else (*x)[ specificAddr ] = 0 ;
 
-				if((*y)[ binStr ] == 0 ) { // 00-SNT
+				if((*y)[ specificAddr ] == 0 ) { // 00-SNT
 					correct2Counters[ i ]++ ;
 				}
-				else if((*y)[ binStr ] == 1 ) { // 01-NT
-					(*y)[ binStr ] = 0 ;
+				else if((*y)[ specificAddr ] == 1 ) { // 01-NT
+					(*y)[ specificAddr ] = 0 ;
 					correct2Counters[ i ]++ ;
 				}
-				else if((*y)[ binStr ] == 10 ) { // 10-T
-					(*y)[ binStr ] = 1 ;
+				else if((*y)[ specificAddr ] == 10 ) { // 10-T
+					(*y)[ specificAddr ] = 1 ;
 				}
-				else if((*y)[ binStr ] == 11 ) { // 11-ST
-					(*y)[ binStr ] = 10 ;
+				else if((*y)[ specificAddr ] == 11 ) { // 11-ST
+					(*y)[ specificAddr ] = 10 ;
 				}
 			}
 
-			if( i == 6 ) {
-				// gshare
+			if( i == 6 ) { // gshare
+				
 			}
 		}
 		// cout << "--------------------------------" << endl ;
