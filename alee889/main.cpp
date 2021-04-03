@@ -52,13 +52,11 @@ void bimodal() {
 		stringstream s( line ) ;
 		s >> hex >> addr >> behavior >> ignore ;
 		bitset<11> bin11( addr ) ;
-		
-		int i = 0 ;
 
-		for( map<string, int>* x : oneMaps ) {
+		for( int i = 0; i < 7; i++ ) {
+			map<string, int>* x = oneMaps[ i ] ;
 			// cout << to_string( i + 1 ) + ": " << endl ;
-			unsigned addr1 = addr % divisors[ i ] ;
-			bitset<11> binSpecific( addr1 ) ;
+			bitset<11> binSpecific( addr % divisors[ i ]) ;
 			binStr = binSpecific.to_string() ;
 			// cout << binStr << endl ;
 
@@ -81,8 +79,6 @@ void bimodal() {
 				}
 				else (*x)[ binStr ] = 0 ;
 			}
-
-			i++ ;
 		}
 		// cout << "--------------------------------" << endl ;
 	}
@@ -107,25 +103,5 @@ int main( int argc, char *argv[]) {
 	AT() ;
 	bimodal() ;
 
-	/*
-	infile.open( "test_input.txt" );
-	outfile.open( "output.txt" ) ;
-
-	while( getline( infile, line )) {
-		stringstream s( line );
-		s >> std::hex >> addr >> behavior >> std::hex >> target;
-
-		if(behavior == "T") {
-			outfile << " -> taken, ";
-		} 
-		else {
-			outfile << " -> not taken, ";
-		}
-		outfile << "target=" << target << endl;
-	}
-
-	infile.close() ;
-	outfile.close() ;
-	*/
 	return 0;
 }
