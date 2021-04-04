@@ -19,6 +19,9 @@ unordered_map<unsigned long long, int> ghr3, ghr4, ghr5, ghr6, ghr7, ghr8, ghr9,
 vector< unordered_map<unsigned long long, int>*> ghrMaps{ &ghr3, &ghr4, &ghr5, &ghr6, &ghr7, &ghr8, &ghr9, &ghr10, &ghr11 } ;
 unsigned long long ghrs [ 9 ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
 
+unordered_map<unsigned long long, int> selectorTable ; 
+
+
 void AT() { // always taken
 	string behavior, line, ignore ;
 	int TCounter = 0 ;
@@ -81,7 +84,7 @@ void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr
 	}
 }
 
-void bimodal() {
+void bimodal() { // and gshare
 	string behavior, line, ignore ;
 	unsigned long long addr;
 	int correct1Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
@@ -89,6 +92,9 @@ void bimodal() {
 	int correctGshare [9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
 	int divisors[ 7 ] = { 16, 32, 128, 256, 512, 1024, 2048 } ;
 	int ghrBits[ 9 ] = { 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } ;
+	int biPrediction ;
+	int gSharePrediction ;
+	int correctSelector = 0 ;
 
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
@@ -105,6 +111,9 @@ void bimodal() {
 			if( !(x->count( specificAddr ))) {
 				(*x)[ specificAddr ] = 1 ;
 				(*y)[ specificAddr ] = 11 ;
+				if( i == 6 ) { // add addr key to selector table if taking 11 bits of PC
+					selectorTable[ specificAddr ] = 11 ;
+				}
 			}
 
 			if( behavior == "T" ) {
@@ -120,6 +129,8 @@ void bimodal() {
 				}
 				else (*x)[ specificAddr ] = 0 ;
 			}
+
+			if( i == 6 ) biPrediction = (*y)[ specificAddr ] ; // get 11 bit PC bimodal prediction
 			setMaps( y, specificAddr, behavior, correct2Counters, i ) ; // set 2 bit table
 			
 			if( i == 6 ) { // gshare
@@ -131,6 +142,7 @@ void bimodal() {
 						(*gShareTable)[ xorAddr ] = 11 ;
 					}
 
+					if( j == 9 ) gSharePrediction = (*gShareTable)[ xorAddr ] ;
 					setMaps( gShareTable, xorAddr, behavior, correctGshare, j ) ;
 					if( behavior == "T" ) {
 						// update GHR
@@ -142,6 +154,40 @@ void bimodal() {
 						// update GHR
 						ghrs[ j ] <<= 1 ; // shift by 1
 						ghrs[ j ] %= ghrBits[ j ] ;
+					}
+				}
+
+				// selector code
+				if( selectorTable[ specificAddr ] == 0 || selectorTable[ specificAddr ] == 1 ) { // gshare
+					if(( behavior == "T" && ( gSharePrediction = 10 || gSharePrediction = 11 )) || ( behavior == "NT" && ( gSharePrediction = 0 || gSharePrediction = 1 ))) {
+						correctSelector++ ;
+						if( selectorTable[ specificAddr ] == 1 ) {
+							selectorTable[ specificAddr ] = 0 ; 
+						}
+					}
+					else if(( behavior == "T" && ( gSharePrediction = 0 || gSharePrediction = 1 )) || ( behavior == "NT" && ( gSharePrediction = 10 || gSharePrediction = 11 ))) {
+						if( selectorTable[ specificAddr ] == 0 ) { // 00
+							selectorTable[ specificAddr ] = 1 ; // set to 01
+						}
+						else { // 01
+							selectorTable[ specificAddr ] = 10 ; 
+						}
+					}
+				}
+				else if( selectorTable[ specificAddr ] == 10 || selectorTable[ specificAddr ] == 11 ) { // prefer bimod 
+					if(( behavior == "T" && ( biPrediction = 10 || biPrediction = 11 )) || ( behavior == "NT" && ( biPrediction = 0 || biPrediction = 1 ))) {
+						correctSelector++ ;
+						if( selectorTable[ specificAddr ] == 10 ) {
+							selectorTable[ specificAddr ] = 11 ; 
+						}
+					}
+					else if(( behavior == "T" && ( biPrediction = 0 || biPrediction = 1 )) || ( behavior == "NT" && ( biPrediction = 10 || biPrediction = 11 ))) {
+						if( selectorTable[ specificAddr ] == 11 ) {
+							selectorTable[ specificAddr ] = 10 ;
+						}
+						else { // 10
+							selectorTable[ specificAddr ] = 1 ; // set to 01
+						}
 					}
 				}
 			}
