@@ -132,7 +132,6 @@ void bimodal() { // and gshare
 
 			if( i == 6 ) { 
 				biPrediction = (*y)[ specificAddr ] ; // get 11 bit PC bimodal prediction
-				// cout << "bi prediction: " + to_string( biPrediction ) << endl ;
 			}
 			setMaps( y, specificAddr, behavior, correct2Counters, i ) ; // set 2 bit table
 			
@@ -147,7 +146,6 @@ void bimodal() { // and gshare
 
 					if( j == 8 ) {
 						gSharePrediction = (*gShareTable)[ xorAddr ] ;
-						// cout << "gshare prediction: " + to_string( gSharePrediction ) << endl ;
 					}
 					setMaps( gShareTable, xorAddr, behavior, correctGshare, j ) ;
 					if( behavior == "T" ) {
@@ -163,23 +161,19 @@ void bimodal() { // and gshare
 					}
 				}
 
-				// cout << "selector: " + to_string( selectorTable[ specificAddr ]) << endl ;
-				// cout << to_string( specificAddr ) << endl ;
 				// selector code
 				if( selectorTable[ specificAddr ] == 0 || selectorTable[ specificAddr ] == 1 ) { // gshare
 					if(( behavior == "T" && ( gSharePrediction == 10 || gSharePrediction == 11 )) || ( behavior == "NT" && ( gSharePrediction == 0 || gSharePrediction == 1 ))) {
-						// cout << "gshare prediction correct!" << endl ;
 						correctSelector++ ;
-						if( selectorTable[ specificAddr ] == 1 ) {
+						if( selectorTable[ specificAddr ] == 1 && ( gSharePrediction/10 != biPrediction/10 )) { // 01
 							selectorTable[ specificAddr ] = 0 ; 
 						}
 					}
 					else if(( behavior == "T" && ( gSharePrediction == 0 || gSharePrediction == 1 )) || ( behavior == "NT" && ( gSharePrediction == 10 || gSharePrediction == 11 ))) {
-						// cout << "gshare prediction wrong!" << endl ;
-						if( selectorTable[ specificAddr ] == 0 ) { // 00
+						if( selectorTable[ specificAddr ] == 0 && ( gSharePrediction/10 != biPrediction/10 )) { // 00
 							selectorTable[ specificAddr ] = 1 ; // set to 01
 						}
-						else { // 01
+						else if( selectorTable[ specificAddr ] == 1 && ( gSharePrediction/10 != biPrediction/10 )){ // 01
 							selectorTable[ specificAddr ] = 10 ; 
 						}
 					}
@@ -187,25 +181,22 @@ void bimodal() { // and gshare
 				else if( selectorTable[ specificAddr ] == 10 || selectorTable[ specificAddr ] == 11 ) { // prefer bimod 
 					if(( behavior == "T" && ( biPrediction == 10 || biPrediction == 11 )) || ( behavior == "NT" && ( biPrediction == 0 || biPrediction == 1 ))) {
 						correctSelector++ ;
-						if( selectorTable[ specificAddr ] == 10 ) {
+						if( selectorTable[ specificAddr ] == 10 && ( gSharePrediction/10 != biPrediction/10 )) {
 							selectorTable[ specificAddr ] = 11 ; 
 						}
-						// cout << "bimod prediction correct!" << endl ;
 					}
 					else if(( behavior == "T" && ( biPrediction == 0 || biPrediction == 1 )) || ( behavior == "NT" && ( biPrediction == 10 || biPrediction == 11 ))) {
-						if( selectorTable[ specificAddr ] == 11 ) {
+						if( selectorTable[ specificAddr ] == 11 && ( gSharePrediction/10 != biPrediction/10 )) {
 							selectorTable[ specificAddr ] = 10 ;
 						}
-						else { // 10
+						else if( selectorTable[ specificAddr ] == 10 && ( gSharePrediction/10 != biPrediction/10 )){ // 10
 							selectorTable[ specificAddr ] = 1 ; // set to 01
 						}
-						// cout << "bimod prediction wrong!" << endl ;
 					}
 				}
 			}
 			
 		}
-		// cout << "----------------------" << endl ;
 	}
 
 	infile.close() ;
