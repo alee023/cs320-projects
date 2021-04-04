@@ -159,13 +159,13 @@ void bimodal() { // and gshare
 
 				// selector code
 				if( selectorTable[ specificAddr ] == 0 || selectorTable[ specificAddr ] == 1 ) { // gshare
-					if(( behavior == "T" && ( gSharePrediction = 10 || gSharePrediction = 11 )) || ( behavior == "NT" && ( gSharePrediction = 0 || gSharePrediction = 1 ))) {
+					if(( behavior == "T" && ( gSharePrediction == 10 || gSharePrediction == 11 )) || ( behavior == "NT" && ( gSharePrediction == 0 || gSharePrediction == 1 ))) {
 						correctSelector++ ;
 						if( selectorTable[ specificAddr ] == 1 ) {
 							selectorTable[ specificAddr ] = 0 ; 
 						}
 					}
-					else if(( behavior == "T" && ( gSharePrediction = 0 || gSharePrediction = 1 )) || ( behavior == "NT" && ( gSharePrediction = 10 || gSharePrediction = 11 ))) {
+					else if(( behavior == "T" && ( gSharePrediction == 0 || gSharePrediction == 1 )) || ( behavior == "NT" && ( gSharePrediction == 10 || gSharePrediction == 11 ))) {
 						if( selectorTable[ specificAddr ] == 0 ) { // 00
 							selectorTable[ specificAddr ] = 1 ; // set to 01
 						}
@@ -175,13 +175,13 @@ void bimodal() { // and gshare
 					}
 				}
 				else if( selectorTable[ specificAddr ] == 10 || selectorTable[ specificAddr ] == 11 ) { // prefer bimod 
-					if(( behavior == "T" && ( biPrediction = 10 || biPrediction = 11 )) || ( behavior == "NT" && ( biPrediction = 0 || biPrediction = 1 ))) {
+					if(( behavior == "T" && ( biPrediction == 10 || biPrediction == 11 )) || ( behavior == "NT" && ( biPrediction == 0 || biPrediction == 1 ))) {
 						correctSelector++ ;
 						if( selectorTable[ specificAddr ] == 10 ) {
 							selectorTable[ specificAddr ] = 11 ; 
 						}
 					}
-					else if(( behavior == "T" && ( biPrediction = 0 || biPrediction = 1 )) || ( behavior == "NT" && ( biPrediction = 10 || biPrediction = 11 ))) {
+					else if(( behavior == "T" && ( biPrediction == 0 || biPrediction == 1 )) || ( behavior == "NT" && ( biPrediction == 10 || biPrediction == 11 ))) {
 						if( selectorTable[ specificAddr ] == 11 ) {
 							selectorTable[ specificAddr ] = 10 ;
 						}
@@ -205,8 +205,13 @@ void bimodal() { // and gshare
 	for( int i = 0; i < 7 ; i++ ) {
 		outfile << to_string( correct2Counters[ i ]) + "," + to_string( numberLines ) + "; " ;
 	}
-
 	outfile << endl ;
+	for( int i = 0; i < 9 ; i++ ) {
+		outfile << to_string( correctGshare[ i ]) + "," + to_string( numberLines ) + "; " ;
+	}
+	outfile << endl ;
+	outfile << to_string( correctSelector ) + "," + to_string( numberLines ) + "; " << endl ;
+
 	outfile.close() ;
 }
 
