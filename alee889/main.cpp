@@ -65,8 +65,7 @@ void predictors() {
 	int correctGshare [9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
 	int divisors[ 7 ] = { 16, 32, 128, 256, 512, 1024, 2048 } ; // btb uses 512 which is at index 4
 	int ghrBits[ 9 ] = { 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } ;
-	int biPrediction ;
-	int gSharePrediction ;
+	int biPrediction, gSharePrediction, btbPrediction ;
 	int correctSelector = 0 ;
 	int attemptedBTB = 0;
 	int correctBTB = 0 ;
@@ -102,6 +101,10 @@ void predictors() {
 				}
 			}
 
+			if( i == 4 ) {
+				btbPrediction = (*x)[ specificAddr ] ; // get 9 bit PC bimodal prediction
+			}
+
 			if( behavior == "T" ) {
 				if((*x)[ specificAddr ] == 0 ) {
 					(*x)[ specificAddr ] = 1 ;
@@ -115,21 +118,20 @@ void predictors() {
 				}
 				else (*x)[ specificAddr ] = 0 ;
 			}
-
 			if( i == 6 ) { 
 				biPrediction = (*y)[ specificAddr ] ; // get 11 bit PC bimodal prediction
 			}
 			setMaps( y, specificAddr, behavior, correct2Counters, i ) ; // set 2 bit table
 			
 			if( i == 4 ) { // btb
-				if((*x)[ specificAddr] == 1 ) { // if predicted to be true
+				if( btbPrediction == 1 ) { // if predicted to be true
 					attemptedBTB++ ; // ... then attempt btb prediction
-				}
-				if( btb[ specificAddr] == target ) {
-					correctBTB++ ;
+					if( btb[ specificAddr ] == target ) {
+						correctBTB++ ;
+					}
 				}
 				if( behavior == "T" ) {
-					btb[ specificAddr ] == target ; // update btb table
+					btb[ specificAddr ] = target ; // update btb table
 				}			
 			}
 

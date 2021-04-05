@@ -5,4 +5,4 @@ main: main.cpp
 	$(CC) -o main main.cpp
 
 clean:
-	rm -f main.o output.txt 
+	rm -f main output.txt 

@@ -1,1 +1,6 @@
-The execution will take a while (around 30 seconds for short_trace1.txt) -- so for long traces, it will take even longer.
+Alison Lee
+alee889
+B00743472
+
+NOTES:
+Testing long_trace1.txt took about a minute, so the other long traces will take even longer
