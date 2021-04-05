@@ -122,7 +122,7 @@ void predictors() {
 			setMaps( y, specificAddr, behavior, correct2Counters, i ) ; // set 2 bit table
 			
 			if( i == 4 ) { // btb
-				if((*y)[ specificAddr] / 10 == 1 ) { // if predicted to be true
+				if((*x)[ specificAddr] == 1 ) { // if predicted to be true
 					attemptedBTB++ ; // ... then attempt btb prediction
 				}
 				if( btb[ specificAddr] == target ) {
@@ -215,7 +215,7 @@ void predictors() {
 	}
 	outfile << endl ;
 	outfile << to_string( correctSelector ) + "," + to_string( numberLines ) + "; " << endl ;
-	outfile << to_string( attemptedBTB ) + "," + to_string( correctBTB ) + ";" << endl ;
+	outfile << to_string( correctBTB ) + "," + to_string( attemptedBTB ) + ";" << endl ;
 	outfile.close() ;
 }
 
