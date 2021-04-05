@@ -21,37 +21,6 @@ unsigned long long ghrs [ 9 ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
 
 unordered_map<unsigned long long, int> selectorTable ; 
 
-/*
-void AT() { // always taken
-	string behavior, line, ignore ;
-	int TCounter = 0 ;
-	int NTCounter = 0 ;
-		
-	ifstream infile( readFile ) ;
-	while( getline( infile, line )) {
-		numberLines++ ;
-		stringstream s( line ) ;
-		s >> ignore >> behavior >> ignore ;
-
-		if( behavior == "T" ) {
-			TCounter++ ;
-			// printf( "%d", TCounter ) ;
-		}
-		else if( behavior == "NT" ) {
-			NTCounter++ ;
-			// printf( "%d", NTCounter ) ;
-
-		}
-	}
-
-	infile.close() ;
-	ofstream outfile( writeFile ) ;
-	outfile << to_string( TCounter ) + "," + to_string( numberLines ) + ";" << endl ;
-	outfile << to_string( NTCounter ) + "," + to_string( numberLines ) + ";" << endl ;
-	outfile.close() ;
-}
-*/
-
 void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr, string behavior, int* arr, int i ) {
 	if( behavior == "T" ) {
 		if((*x)[ addr ] == 0 ) { // 00-SNT
@@ -85,11 +54,11 @@ void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr
 	}
 }
 
-void bimodal() {
+void predictors() {
 	string behavior, line, ignore ;
 	unsigned long long addr;
-	int TCounter ;
-	int NTCounter ;
+	int TCounter = 0 ;
+	int NTCounter = 0 ;
 	int correct1Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
 	int correct2Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
 	int correctGshare [9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
@@ -111,6 +80,7 @@ void bimodal() {
 		else if( behavior == "NT" ) {
 			NTCounter++ ;
 		}
+		numberLines++ ;
 
 		for( int i = 0; i < 7; i++ ) { // i corresponds with index used to access array divisors
 			unordered_map<unsigned long long, int>* x = oneMaps[ i ] ;
@@ -238,8 +208,7 @@ int main( int argc, char *argv[]) {
 	readFile = argv[ 1 ] ;
 	writeFile = argv[ 2 ] ;
 
-	// AT() ;
-	bimodal() ;
+	predictors() ;
 
 	return 0;
 }
