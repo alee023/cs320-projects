@@ -21,7 +21,7 @@ unsigned long long ghrs [ 9 ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
 
 unordered_map<unsigned long long, int> selectorTable ; 
 
-
+/*
 void AT() { // always taken
 	string behavior, line, ignore ;
 	int TCounter = 0 ;
@@ -50,6 +50,7 @@ void AT() { // always taken
 	outfile << to_string( NTCounter ) + "," + to_string( numberLines ) + ";" << endl ;
 	outfile.close() ;
 }
+*/
 
 void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr, string behavior, int* arr, int i ) {
 	if( behavior == "T" ) {
@@ -84,13 +85,15 @@ void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr
 	}
 }
 
-void bimodal() { // and gshare
+void bimodal() {
 	string behavior, line, ignore ;
 	unsigned long long addr;
+	int TCounter ;
+	int NTCounter ;
 	int correct1Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
 	int correct2Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
 	int correctGshare [9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
-	int divisors[ 7 ] = { 16, 32, 128, 256, 512, 1024, 2048 } ;
+	int divisors[ 7 ] = { 16, 32, 128, 256, 512, 1024, 2048 } ; // btb uses 512 which is at index 4
 	int ghrBits[ 9 ] = { 8, 16, 32, 64, 128, 256, 512, 1024, 2048 } ;
 	int biPrediction ;
 	int gSharePrediction ;
@@ -101,6 +104,13 @@ void bimodal() { // and gshare
 		stringstream s( line ) ;
 		s >> hex >> addr >> behavior >> ignore ;
 		addr %= 2048 ;
+
+		if( behavior == "T" ) {
+			TCounter++ ;
+		}
+		else if( behavior == "NT" ) {
+			NTCounter++ ;
+		}
 
 		for( int i = 0; i < 7; i++ ) { // i corresponds with index used to access array divisors
 			unordered_map<unsigned long long, int>* x = oneMaps[ i ] ;
@@ -201,6 +211,8 @@ void bimodal() { // and gshare
 
 	infile.close() ;
 	ofstream outfile( writeFile, fstream::app ) ;
+	outfile << to_string( TCounter ) + "," + to_string( numberLines ) + ";" << endl ;
+	outfile << to_string( NTCounter ) + "," + to_string( numberLines ) + ";" << endl ;
 
 	for( int i = 0; i < 7 ; i++ ) {
 		outfile << to_string( correct1Counters[ i ]) + "," + to_string( numberLines ) + "; " ;
@@ -226,7 +238,7 @@ int main( int argc, char *argv[]) {
 	readFile = argv[ 1 ] ;
 	writeFile = argv[ 2 ] ;
 
-	AT() ;
+	// AT() ;
 	bimodal() ;
 
 	return 0;
