@@ -1,0 +1,1 @@
+The execution will take a while (around 30 seconds for short_trace1.txt) -- so for long traces, it will take even longer.

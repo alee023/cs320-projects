@@ -215,7 +215,7 @@ void predictors() {
 	}
 	outfile << endl ;
 	outfile << to_string( correctSelector ) + "," + to_string( numberLines ) + "; " << endl ;
-
+	outfile << to_string( attemptedBTB ) + "," + to_string( correctBTB ) + ";" << endl ;
 	outfile.close() ;
 }
 
