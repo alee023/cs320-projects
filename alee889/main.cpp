@@ -20,6 +20,7 @@ vector< unordered_map<unsigned long long, int>*> ghrMaps{ &ghr3, &ghr4, &ghr5, &
 unsigned long long ghrs [ 9 ] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 } ;
 
 unordered_map<unsigned long long, int> selectorTable ; 
+unordered_map<unsigned long long, unsigned long long> btb ;
 
 void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr, string behavior, int* arr, int i ) {
 	if( behavior == "T" ) {
@@ -55,8 +56,8 @@ void setMaps( unordered_map<unsigned long long, int>* x, unsigned long long addr
 }
 
 void predictors() {
-	string behavior, line, ignore ;
-	unsigned long long addr;
+	string behavior, line ;
+	unsigned long long addr, target ;
 	int TCounter = 0 ;
 	int NTCounter = 0 ;
 	int correct1Counters [7] = { 0, 0, 0, 0, 0, 0, 0 } ;
@@ -67,11 +68,13 @@ void predictors() {
 	int biPrediction ;
 	int gSharePrediction ;
 	int correctSelector = 0 ;
+	int attemptedBTB = 0;
+	int correctBTB = 0 ;
 
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
 		stringstream s( line ) ;
-		s >> hex >> addr >> behavior >> ignore ;
+		s >> hex >> addr >> behavior >> hex >> target ;
 		addr %= 2048 ;
 
 		if( behavior == "T" ) {
@@ -91,6 +94,9 @@ void predictors() {
 			if( !(x->count( specificAddr ))) {
 				(*x)[ specificAddr ] = 1 ;
 				(*y)[ specificAddr ] = 11 ;
+				if( i == 4 ) {
+					btb[ specificAddr ] = 0 ;
+				}
 				if( i == 6 ) { // add addr key to selector table if taking 11 bits of PC
 					selectorTable[ specificAddr ] = 0 ;
 				}
@@ -115,6 +121,18 @@ void predictors() {
 			}
 			setMaps( y, specificAddr, behavior, correct2Counters, i ) ; // set 2 bit table
 			
+			if( i == 4 ) { // btb
+				if((*y)[ specificAddr] / 10 == 1 ) { // if predicted to be true
+					attemptedBTB++ ; // ... then attempt btb prediction
+				}
+				if( btb[ specificAddr] == target ) {
+					correctBTB++ ;
+				}
+				if( behavior == "T" ) {
+					btb[ specificAddr ] == target ; // update btb table
+				}			
+			}
+
 			if( i == 6 ) { // gshare
 				for( int j = 0; j < 9; j++ ) { // for each 9 ghrs
 					unsigned long long xorAddr = specificAddr ^ ghrs[ j ] ;
