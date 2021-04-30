@@ -1,8 +1,8 @@
 CC=g++
 CXXFLAGS='-D_GLIBCXX_USE_CXX11_ABI=0'
 
-main: main.cpp
-	$(CC) -o main main.cpp
+predictors: predictors.cpp
+	$(CC) -o predictors predictors.cpp
 
 clean:
-	rm -f main output.txt 
+	rm -f predictors output.txt 
