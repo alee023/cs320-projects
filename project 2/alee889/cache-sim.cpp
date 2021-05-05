@@ -17,11 +17,19 @@ void dMap() {
 	int sASets[ 4 ] = { 256, 128, 64, 32 } ;
 	int dMapHits[ 4 ] = { 0, 0, 0, 0 } ;
 
-	int twoAssoc[ 256 ][ 2 ] ;
-	int fourAssoc[ 128 ][ 4 ] ;
-	int eightAssoc[ 64 ][ 8 ] ;
-	int sixteenAssoc[ 32 ][ 16 ] ;
-	vector<int*> sACaches{ twoAssoc, fourAssoc, eightAssoc, sixteenAssoc } ;
+	vector<vector<int>> twoAssoc( 256 ) ;
+	vector<vector<int>> fourAssoc( 128 ) ;
+	vector<vector<int>> eightAssoc( 64 ) ;
+	vector<vector<int>> sixteenAssoc( 32 ) ;
+	vector<vector<vector<int>>*> sACaches{ twoAssoc, fourAssoc, eightAssoc, sixteenAssoc } ;
+	for( int i = 0; i < 4; i++ ) {
+		vector<vector<int>>* x = sACaches[ i ] ;
+		for( int j = 0; j < sASets[ i ]; j++ ) {
+			for( int k = 0; k < associativities[ i ]; k++ ) {
+				x[ sASets[ i ]][ k ] = 0 ;
+			}
+		}
+	}
 	
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
