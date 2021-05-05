@@ -13,7 +13,7 @@ void dMap() {
 	unsigned long long addr ;
 	int dBlocks[ 4 ] = { 32, 128, 512, 1024 } ;
 	int arrCaches[ 4 ][ 1024 ] ;
-	int dMapHits = 0 ;
+	int dMapHits[ 4 ] = { 0, 0, 0, 0 } ;
 	
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
@@ -28,7 +28,7 @@ void dMap() {
 				arrCaches[ i ][ index ] = ( addr / 32 ) ;
 			}
 			else {
-				dMapHits++ ;
+				dMapHits[ i ]++ ;
 			}
 		}
 		
