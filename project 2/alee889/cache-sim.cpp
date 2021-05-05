@@ -36,7 +36,9 @@ void dMap() {
 	
 	infile.close() ;
 	ofstream outfile( writeFile ) ;
-	outfile << to_string( dMapHits ) + "," + to_string( numberLines ) + ";" << endl ;
+	for( int i = 0; i < 4; i++ ) {
+		outfile << to_string( dMapHits[ i ] ) + "," + to_string( numberLines ) + ";" << endl ;
+	}
 	outfile.close() ;
 }
 
