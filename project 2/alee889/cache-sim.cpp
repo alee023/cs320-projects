@@ -21,12 +21,12 @@ void dMap() {
 	vector<vector<int>> fourAssoc( 128 ) ;
 	vector<vector<int>> eightAssoc( 64 ) ;
 	vector<vector<int>> sixteenAssoc( 32 ) ;
-	vector<vector<vector<int>>*> sACaches{ twoAssoc, fourAssoc, eightAssoc, sixteenAssoc } ;
+	vector<vector<vector<int>>*> sACaches{ &twoAssoc, &fourAssoc, &eightAssoc, &sixteenAssoc } ;
 	for( int i = 0; i < 4; i++ ) {
 		vector<vector<int>>* x = sACaches[ i ] ;
 		for( int j = 0; j < sASets[ i ]; j++ ) {
 			for( int k = 0; k < associativities[ i ]; k++ ) {
-				x[ sASets[ i ]][ k ] = 0 ;
+				(*x)[ sASets[ i ]][ k ] = 0 ;
 			}
 		}
 	}
