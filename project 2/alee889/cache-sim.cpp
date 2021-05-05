@@ -11,7 +11,7 @@ int numberLines = 0 ;
 void dMap() {
 	string line, type ;
 	unsigned long long addr ;
-	int[] dBlocks = { 32, 128, 512, 1024 } ;
+	int[ 4 ] dBlocks = { 32, 128, 512, 1024 } ;
 	int arrCaches[ 4 ][ 1024 ] ;
 	int dMapHits = 0 ;
 	
