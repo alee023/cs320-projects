@@ -22,6 +22,8 @@ void dMap() {
 	vector<vector<int>> eightAssoc( 64 ) ;
 	vector<vector<int>> sixteenAssoc( 32 ) ;
 	vector<vector<vector<int>>*> sACaches{ &twoAssoc, &fourAssoc, &eightAssoc, &sixteenAssoc } ;
+	vector<vector<int>> twoALRU( 256 ), fourALRU( 128 ), eightALRU( 64 ), sixteenALRU( 32 ) ;
+	vector<vector<vector<int>>*> sALRUs{ &twoALRU, &fourALRU, &eightALRU, &sixteenALRU } ;
 	for( int i = 0; i < 4; i++ ) {
 		vector<vector<int>>* x = sACaches[ i ] ;
 		for( int j = 0; j < sASets[ i ]; j++ ) {
