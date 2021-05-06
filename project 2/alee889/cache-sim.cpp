@@ -105,7 +105,8 @@ int main( int argc, char *argv[]) {
 	outfile << to_string( sAssoc( 2 )) + "," + to_string( numberLines ) + "; " ;
 	outfile << to_string( sAssoc( 4 )) + "," + to_string( numberLines ) + "; " ;
 	outfile << to_string( sAssoc( 8 )) + "," + to_string( numberLines ) + "; " ;
-	outfile << to_string( sAssoc( 16 )) + "," + to_string( numberLines ) + "; " ;
+	outfile << to_string( sAssoc( 16 )) + "," + to_string( numberLines ) + ";" ;
 
+	outfile.close() ;
 	return 0;
 }
