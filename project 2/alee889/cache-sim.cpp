@@ -52,8 +52,14 @@ int sAssoc( int associativity ) {
 	int numHits = 0 ;
 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
-	vector<vector<int>> cache( numSets, vector<int>( associativity, 0 )) ;
-	vector<vector<int>> lru( numSets, vector<int>( associativity, 0 )) ;
+	int cache[ numSets ][ associativity ] ;
+	int lru[ numSets ][ associativity ] ;
+
+	for( int i = 0; i < numSets; i++ ) {
+		for( int j = 0; j < associativity; j++ ) {
+			lru[ i ][ j ] = 0 ;
+		}
+	}
 	
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
@@ -66,7 +72,7 @@ int sAssoc( int associativity ) {
 		int timer = 0 ;
 
 		for( int i = 0; i < associativity; i++ ) {
-			if( cache[ index ][ i ] == 32 * ( addr / 32 )) {
+			if( cache[ index ][ i ] ==  addr / 32 ) {
 				found = true ;
 				numHits++ ;
 				lru[ index ][ i ] = ++timer ;
@@ -81,9 +87,11 @@ int sAssoc( int associativity ) {
 				}
 			}
 			lru[ index ][ minIndex ] = ++timer ;
-			cache[ index ][ minIndex ] = 32 * ( addr / 32 ) ;
+			cache[ index ][ minIndex ] = addr / 32 ;
 		}
 	}
+
+	infile.close() ;
 
 	return( numHits ) ;
 }
