@@ -63,21 +63,25 @@ int sAssoc( int associativity ) {
 		int index = ( addr / 32 ) % numSets ;
 		bool found = false ;
 		int minIndex = 0 ;
+		int timer = 0 ;
 
 		for( int i = 0; i < associativity; i++ ) {
-			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
-				minIndex = i ;
-			}
-			if( cache[ index ][ i ] == addr / 32 ) {
+			if( cache[ index ][ i ] == 32 * ( addr / 32 )) {
 				found = true ;
 				numHits++ ;
-				lru[ index ][ i ]++ ;
+				lru[ index ][ i ] = ++timer ;
+				break ;
 			}
 		}
 
 		if( !found ) {
-			lru[ index ][ minIndex ]++ ;
-			cache[ index ][ minIndex ] = addr / 32 ;
+			for( int i = 0; i < associativity; i++ ) {
+				if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
+					minIndex = i ;
+				}
+			}
+			lru[ index ][ minIndex ] = ++timer ;
+			cache[ index ][ minIndex ] = 32 * ( addr / 32 ) ;
 		}
 	}
 
