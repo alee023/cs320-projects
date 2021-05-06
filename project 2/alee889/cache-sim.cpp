@@ -63,7 +63,7 @@ void dMap() {
 				if((*y)[ index ][ j ] < (*y)[ index ][ minLRU ]) {
 					minLRU = j ;
 				}
-				if((*x)[ index ][ j ] == addr / 32 ) {
+				if((*x)[ index ][ j ] == addr >> log2( sASets[ i ]) + 5 ) {
 					sAHits[ i ]++ ;
 					(*y)[ index ][ j ]++ ;
 					hit = true ;
