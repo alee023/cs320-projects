@@ -3,6 +3,7 @@
 #include<sstream>
 #include<string>
 #include<vector>
+#include <math.h>
 
 using namespace std;
 string readFile, writeFile ;
@@ -63,7 +64,7 @@ void dMap() {
 				if((*y)[ index ][ j ] < (*y)[ index ][ minLRU ]) {
 					minLRU = j ;
 				}
-				if((*x)[ index ][ j ] == addr >> log2( sASets[ i ]) + 5 ) {
+				if((*x)[ index ][ j ] == ( addr / 32 ) * 32 ) {
 					sAHits[ i ]++ ;
 					(*y)[ index ][ j ]++ ;
 					hit = true ;
@@ -72,7 +73,7 @@ void dMap() {
 
 			if( !hit ) {
 				(*y)[ index ][ minLRU ]++ ;
-				(*x)[ index ][ minLRU ] = addr / 32 ;
+				(*x)[ index ][ minLRU ] = ( addr / 32 ) * 32 ;
 			}
 		}
 		//============================================================
