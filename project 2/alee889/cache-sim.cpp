@@ -67,7 +67,6 @@ void dMap() {
 					sAHits[ i ]++ ;
 					(*y)[ index ][ j ]++ ;
 					hit = true ;
-					break ;
 				}
 			}
 
