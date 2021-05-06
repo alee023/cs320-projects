@@ -49,9 +49,11 @@ void dMap() {
 int sAssoc( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
-	int numHits = 0 ;
+	int numHits = 0 ;		
+	int timer = 0 ;
 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
+	// cout << to_string( numSets ) << endl ;
 	int cache[ numSets ][ associativity ] ;
 	int lru[ numSets ][ associativity ] ;
 
@@ -69,23 +71,19 @@ int sAssoc( int associativity ) {
 		int index = ( addr / 32 ) % numSets ;
 		bool found = false ;
 		int minIndex = 0 ;
-		int timer = 0 ;
 
 		for( int i = 0; i < associativity; i++ ) {
+			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
+				minIndex = i ;
+			}
 			if( cache[ index ][ i ] ==  addr / 32 ) {
 				found = true ;
 				numHits++ ;
 				lru[ index ][ i ] = ++timer ;
-				break ;
 			}
 		}
 
 		if( !found ) {
-			for( int i = 0; i < associativity; i++ ) {
-				if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
-					minIndex = i ;
-				}
-			}
 			lru[ index ][ minIndex ] = ++timer ;
 			cache[ index ][ minIndex ] = addr / 32 ;
 		}
@@ -93,7 +91,7 @@ int sAssoc( int associativity ) {
 
 	infile.close() ;
 
-	return( numHits ) ;
+	return( numHits - 1 ) ;
 }
 
 int main( int argc, char *argv[]) {
