@@ -18,20 +18,20 @@ void dMap() {
 	int dMapHits[ 4 ] = { 0, 0, 0, 0 } ;
 	int sAHits[ 4 ] = { 0, 0, 0, 0 } ;
 
-	vector<vector<int>> twoAssoc( 256 ) ;
-	vector<vector<int>> fourAssoc( 128 ) ;
-	vector<vector<int>> eightAssoc( 64 ) ;
-	vector<vector<int>> sixteenAssoc( 32 ) ;
-	vector<vector<vector<int>>*> sACaches{ &twoAssoc, &fourAssoc, &eightAssoc, &sixteenAssoc } ;
-	vector<vector<int>> twoALRU( 256 );
-	vector<vector<int>> fourALRU( 128 ) ;
-	vector<vector<int>> eightALRU( 64 ) ;
-	vector<vector<int>> sixteenALRU( 32 ) ;
-	vector<vector<vector<int>>*> sALRUs{ &twoALRU, &fourALRU, &eightALRU, &sixteenALRU } ;
+	int twoAssoc[ 256 ][ 2 ] ;
+	int fourAssoc[ 128 ][ 4 ] ;
+	int eightAssoc[ 64 ][ 8 ] ;
+	int sixteenAssoc[ 32 ][ 16 ] ;
+	vector<int*> sACaches{ &twoAssoc, &fourAssoc, &eightAssoc, &sixteenAssoc } ;
+	int twoALRU( 256 );
+	int fourALRU( 128 ) ;
+	int eightALRU( 64 ) ;
+	int sixteenALRU( 32 ) ;
+	vector<int*> sALRUs{ &twoALRU, &fourALRU, &eightALRU, &sixteenALRU } ;
 	
 	for( int i = 0; i < 4; i++ ) {
-		vector<vector<int>>* x = sACaches[ i ] ;
-		vector<vector<int>>* y = sALRUs[ i ] ;
+		vector<int*>* x = sACaches[ i ] ;
+		vector<int*>* y = sALRUs[ i ] ;
 		/*
 		for( int j = 0; j < sASets[ i ]; j++ ) {
 			for( int k = 0; k < associativities[ i ]; k++ ) {
@@ -39,7 +39,7 @@ void dMap() {
 				(*y)[ j ][ k ] = 0 ;
 			}
 		}
-*/
+		*/
 	}
 
 	printf( "" + fourAssoc[ 125 ][ 2 ] ) ;
