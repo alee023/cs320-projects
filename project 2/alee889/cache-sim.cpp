@@ -61,9 +61,6 @@ void dMap() {
 			vector<vector<int>>* y = sALRUs[ i ] ;
 
 			for( int j = 0; j < associativities[ i ]; j++ ) {
-				if((*y)[ index ][ j ] < (*y)[ index ][ minLRU ]) {
-					minLRU = j ;
-				}
 				if((*x)[ index ][ j ] == ( addr / 32 ) * 32 ) {
 					sAHits[ i ]++ ;
 					(*y)[ index ][ j ]++ ;
@@ -72,6 +69,11 @@ void dMap() {
 			}
 
 			if( !hit ) {
+				for( int j = 0; j < associativities[ i ]; j++ ) {
+					if((*y)[ index ][ j ] < (*y)[ index ][ minLRU ]) {
+						minLRU = j ;
+					}
+				}
 				(*y)[ index ][ minLRU ]++ ;
 				(*x)[ index ][ minLRU ] = ( addr / 32 ) * 32 ;
 			}
