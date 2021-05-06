@@ -29,21 +29,8 @@ void dMap() {
 	vector<vector<int>> sixteenALRU( 32, vector<int> ( 16, 0 )) ;
 	vector<vector<vector<int>>*> sALRUs{ &twoALRU, &fourALRU, &eightALRU, &sixteenALRU } ;
 	
-	/*
-	for( int i = 0; i < 4; i++ ) {
-		vector<vector<int>>* x = sACaches[ i ] ;
-		vector<vector<int>>* y = sALRUs[ i ] ;
-		
-		for( int j = 0; j < sASets[ i ]; j++ ) {
-			for( int k = 0; k < associativities[ i ]; k++ ) {
-				(*x)[ j ][ k ] = 0 ;
-				(*y)[ j ][ k ] = 0 ;
-			}
-		}
-	}
-	*/
-
-	printf( "" + fourAssoc[ 125 ][ 2 ] ) ;
+	// vector<vector<int>>* a = sACaches[ 1 ] ;
+	// cout << to_string( (*a)[ 125 ][ 2 ]) << endl ;
 	
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
@@ -63,10 +50,10 @@ void dMap() {
 			}
 		}
 		//============================================================
-/*
+
 		//=====================set associative========================
 		for( int i = 0; i < 4; i++ ) {
-			unsigned long long index = ( addr / 32 ) & sASets[ i ] ;
+			unsigned long long index = ( addr / 32 ) % sASets[ i ] ;
 			bool hit = false ;
 			int minLRU = 0;
 			vector<vector<int>>* x = sACaches[ i ] ;
@@ -90,7 +77,7 @@ void dMap() {
 			}
 		}
 		//============================================================
-*/
+
 	}
 	
 	infile.close() ;
