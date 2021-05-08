@@ -59,6 +59,7 @@ string sAssoc( int associativity ) {
 
 	for( int i = 0; i < numSets; i++ ) {
 		for( int j = 0; j < associativity; j++ ) {
+			cache[ i ][ j ] = 0 ;
 			lru[ i ][ j ] = 0 ;
 		}
 	}
@@ -104,6 +105,7 @@ string fAssocLRU() {
 	int lru[ 512 ] ;
 
 	for( int i = 0; i < 512; i++ ) {
+		cache[ i ] = 0 ;
 		lru[ i ] = 0 ;
 	}
 
@@ -152,6 +154,7 @@ string noAlloc( int associativity ) {
 
 	for( int i = 0; i < numSets; i++ ) {
 		for( int j = 0; j < associativity; j++ ) {
+			cache[ i ][ j ] = 0 ;
 			lru[ i ][ j ] = 0 ;
 		}
 	}
@@ -203,7 +206,8 @@ string sAssocNL( int associativity ) {
 	int lru[ numSets ][ associativity ] ;
 
 	for( int i = 0; i < numSets; i++ ) {
-		for( int j = 0; j < associativity; j++ ) {
+		for( int j = 0; j < associativity; j++ ) {			
+			cache[ i ][ j ] = 0 ;
 			lru[ i ][ j ] = 0 ;
 		}
 	}
@@ -239,7 +243,7 @@ string sAssocNL( int associativity ) {
 
 		// PREFETCH
 		found = false ;
-		NLIndex = ( 1 + addr / 32) % numSets ;
+		int NLIndex = ( 1 + addr / 32) % numSets ;
 		minIndex = 0 ;
 		for( int i = 0; i < associativity; i++ ) {
 			if( cache[ NLIndex ][ i ] == 1 + addr / 32 ) {
@@ -283,6 +287,12 @@ int main( int argc, char *argv[]) {
 	outfile << noAlloc( 4 ) + "," + to_string( numberLines ) + "; " ;
 	outfile << noAlloc( 8 ) + "," + to_string( numberLines ) + "; " ;
 	outfile << noAlloc( 16 ) + "," + to_string( numberLines ) + ";" << endl ;
+
+	outfile << sAssocNL( 2 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << sAssocNL( 4 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << sAssocNL( 8 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << sAssocNL( 16 ) + "," + to_string( numberLines ) + ";" << endl ;
+
 
 	outfile.close() ;
 	return 0;
