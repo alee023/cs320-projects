@@ -95,14 +95,17 @@ int sAssoc( int associativity ) {
 }
 
 //====================== fully assoc ===============================
-void fAssocLRU() {
+int fAssocLRU() {
 	string line, type ;
 	unsigned long long addr ;
 	int numHits = 0 ;		
 	int timer = 0 ;
-	int numBlocks = ( 16 * 1024)/32 ;
-	int cache[ numBlocks ] = {} ;
-	int lru[ numBlocks ] = {} ;
+	int cache[ 512 ] ;
+	int lru[ 512 ] ;
+
+	for( int i = 0; i < 512; i++ ) {
+		lru[ i ] = 0 ;
+	}
 
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
@@ -111,18 +114,21 @@ void fAssocLRU() {
 
 		bool found = false ;
 		int minIndex = 0 ;
-		for( int i = 0; i < numBlocks; i++ ) {
-			if( lru[ i ] < lru[ minIndex ]) {
-				minIndex = i ;
-			}
+		for( int i = 0; i < 512; i++ ) {
 			if( cache[ i ] == addr / 32 ) {
 				found = true ;
 				numHits++ ;
 				lru[ i ] = ++timer ;
+				break ;
 			}
 		}
 
 		if( !found ) {
+			for( int i = 0; i < 512; i++ ) {
+				if( lru[ i ] < lru[ minIndex ] ) {
+					minIndex = i ;
+				}
+			}
 			lru[ minIndex ] = ++timer ;
 			cache[ minIndex ] = addr / 32 ;
 		}
@@ -130,9 +136,7 @@ void fAssocLRU() {
 
 	infile.close() ;
 
-	ofstream outfile( writeFile ) ;
-	outfile << to_string( numHits ) + "," + to_string( numberLines ) + ";" << endl ;
-	outfile.close() ;
+	return numHits ;
 }
 
 int main( int argc, char *argv[]) {
@@ -144,8 +148,9 @@ int main( int argc, char *argv[]) {
 	outfile << to_string( sAssoc( 2 )) + "," + to_string( numberLines ) + "; " ;
 	outfile << to_string( sAssoc( 4 )) + "," + to_string( numberLines ) + "; " ;
 	outfile << to_string( sAssoc( 8 )) + "," + to_string( numberLines ) + "; " ;
-	outfile << to_string( sAssoc( 16 )) + "," + to_string( numberLines ) + ";" ;
-
+	outfile << to_string( sAssoc( 16 )) + "," + to_string( numberLines ) + ";" << endl ;
+	
+	outfile << to_string( fAssocLRU()) + "," + to_string( numberLines ) + ";" << endl ;
 
 	outfile.close() ;
 	return 0;
