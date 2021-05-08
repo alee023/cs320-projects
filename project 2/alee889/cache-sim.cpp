@@ -46,11 +46,11 @@ void dMap() {
 }
 
 //=========================set assoc ==================================
-int sAssoc( int associativity ) {
+string sAssoc( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
-	unsigned long long numHits = 0 ;		
-	unsigned long long timer = 0 ;
+	int numHits = 0 ;		
+	int timer = 0 ;
  
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
 	// cout << to_string( numSets ) << endl ;
@@ -91,11 +91,11 @@ int sAssoc( int associativity ) {
 
 	infile.close() ;
 
-	return( numHits ) ;
+	return( to_string( numHits )) ;
 }
 
 //====================== fully assoc ===============================
-int fAssocLRU() {
+string fAssocLRU() {
 	string line, type ;
 	unsigned long long addr ;
 	unsigned long long numHits = 0 ;		
@@ -136,11 +136,11 @@ int fAssocLRU() {
 
 	infile.close() ;
 
-	return numHits ;
+	return( to_string( numHits )) ;
 }
 
 //================set assoc no alloc ==================================
-int noAlloc( int associativity ) {
+string noAlloc( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
 	unsigned long long numHits = 0 ;		
@@ -188,7 +188,82 @@ int noAlloc( int associativity ) {
 
 	infile.close() ;
 
-	return( numHits ) ;
+	return( to_string( numHits )) ;
+}
+
+//=====================set assoc w next line prefetch====================
+string sAssocNL( int associativity ) {
+	string line, type ;
+	unsigned long long addr ;
+	unsigned long long numHits = 0 ;		
+	unsigned long long timer = 0 ;
+
+	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
+	int cache[ numSets ][ associativity ] ;
+	int lru[ numSets ][ associativity ] ;
+
+	for( int i = 0; i < numSets; i++ ) {
+		for( int j = 0; j < associativity; j++ ) {
+			lru[ i ][ j ] = 0 ;
+		}
+	}
+	
+	ifstream infile( readFile ) ;
+	while( getline( infile, line )) {
+		stringstream s( line ) ;
+		s >> type >> hex >> addr ;
+
+		int index = ( addr / 32 ) % numSets ;
+		bool found = false ;
+		int minIndex = 0 ;
+
+		for( int i = 0; i < associativity; i++ ) {
+			if( cache[ index ][ i ] == addr / 32 ) {
+				found = true ;
+				numHits++ ;
+				lru[ index ][ i ] = ++timer ;
+				break ;
+			}
+		}
+
+		if( !found ) {
+			for( int i = 0; i < associativity; i++ ) {
+				if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
+					minIndex = i ;
+				}
+			}
+
+			lru[ index ][ minIndex ] = ++timer ;
+			cache[ index ][ minIndex ] = addr / 32 ;
+		}
+
+		// PREFETCH
+		found = false ;
+		NLIndex = ( 1 + addr / 32) % numSets ;
+		minIndex = 0 ;
+		for( int i = 0; i < associativity; i++ ) {
+			if( cache[ NLIndex ][ i ] == 1 + addr / 32 ) {
+				found = true ;
+				lru[ NLIndex ][ i ] = ++timer ;
+				break ;
+			}
+		}
+
+		if( !found ) {
+			for( int i = 0; i < associativity; i++ ) {
+				if( lru[ NLIndex ][ i ] < lru[ NLIndex ][ minIndex ]) {
+					minIndex = i ;
+				}
+			}
+
+			lru[ NLIndex ][ minIndex ] = ++timer ;
+			cache[ NLIndex ][ minIndex ] = 1 + addr / 32 ;
+		}
+	}
+
+	infile.close() ;
+
+	return( to_string( numHits )) ;
 }
 
 int main( int argc, char *argv[]) {
@@ -197,17 +272,17 @@ int main( int argc, char *argv[]) {
 
 	dMap() ;
 	ofstream outfile( writeFile, fstream::app ) ;
-	outfile << to_string( sAssoc( 2 )) + "," + to_string( numberLines ) + "; " ;
-	outfile << to_string( sAssoc( 4 )) + "," + to_string( numberLines ) + "; " ;
-	outfile << to_string( sAssoc( 8 )) + "," + to_string( numberLines ) + "; " ;
-	outfile << to_string( sAssoc( 16 )) + "," + to_string( numberLines ) + ";" << endl ;
+	outfile << sAssoc( 2 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << sAssoc( 4 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << sAssoc( 8 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << sAssoc( 16 ) + "," + to_string( numberLines ) + ";" << endl ;
 	
-	outfile << to_string( fAssocLRU()) + "," + to_string( numberLines ) + ";" << endl ;
+	outfile << fAssocLRU() + "," + to_string( numberLines ) + ";" << endl ;
 
-	outfile << to_string( noAlloc( 2 )) + "," + to_string( numberLines ) + "; " ;
-	outfile << to_string( noAlloc( 4 )) + "," + to_string( numberLines ) + "; " ;
-	outfile << to_string( noAlloc( 8 )) + "," + to_string( numberLines ) + "; " ;
-	outfile << to_string( noAlloc( 16 )) + "," + to_string( numberLines ) + ";" << endl ;
+	outfile << noAlloc( 2 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << noAlloc( 4 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << noAlloc( 8 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << noAlloc( 16 ) + "," + to_string( numberLines ) + ";" << endl ;
 
 	outfile.close() ;
 	return 0;
