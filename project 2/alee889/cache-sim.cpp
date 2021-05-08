@@ -48,54 +48,65 @@ void dMap() {
 }
 
 //=========================set assoc ==================================
-string sAssoc( int associativity ) {
+void sAssoc() {
 	string line, type ;
 	unsigned long long addr ;
-	int numHits = 0 ;		
-	int timer = 0 ;
- 
-	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
-	int indexBits = log2( numSets ) ;
-	int cache[ numSets ][ associativity ] ;
-	int lru[ numSets ][ associativity ] ;
+	int timer[ 4 ] = { 0, 0, 0, 0 } ;
+ 	int associativities[ 4 ] = { 2, 4, 8, 16 } ;
+	int sASets[ 4 ] = { 256, 128, 64, 32 } ;
+	int sAHits[ 4 ] = { 0, 0, 0, 0 } ;
 
-	for( int i = 0; i < numSets; i++ ) {
-		for( int j = 0; j < associativity; j++ ) {
-			cache[ i ][ j ] = 0 ;
-			lru[ i ][ j ] = 0 ;
-		}
-	}
+	int indexBits = log2( numSets ) ;
+	vector<vector<int>> twoAssoc( 256, vector<int> ( 2, 0 )) ;
+	vector<vector<int>> fourAssoc( 128, vector<int> ( 4, 0 )) ;
+	vector<vector<int>> eightAssoc( 64, vector<int> ( 8, 0 )) ;
+	vector<vector<int>> sixteenAssoc( 32, vector<int> ( 16, 0 )) ;
+	vector<vector<vector<int>>*> sACaches{ &twoAssoc, &fourAssoc, &eightAssoc, &sixteenAssoc } ;
+	vector<vector<int>> twoALRU( 256, vector<int> ( 2, 0 ));
+	vector<vector<int>> fourALRU( 128, vector<int> ( 4, 0 )) ;
+	vector<vector<int>> eightALRU( 64, vector<int> ( 8, 0 )) ;
+	vector<vector<int>> sixteenALRU( 32, vector<int> ( 16, 0 )) ;
+	vector<vector<vector<int>>*> sALRUs{ &twoALRU, &fourALRU, &eightALRU, &sixteenALRU } ;
 	
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
 		stringstream s( line ) ;
 		s >> type >> hex >> addr ;
 
-		int index = ( addr / 32 ) % numSets ;
-		unsigned long long tag = addr >> ( indexBits + 5 ) ;
-		bool found = false ;
-		int minIndex = 0 ;
+		for( int i = 0; i < 4; i++ ) {
+			unsigned long long index = ( addr / 32 ) % sASets[ i ] ;
+			unsigned long long tag = addr >> ( log2( sASets[ i ] ) + 5 ) ;
+			bool found = false ;
+			int minLRU = 0;
+			vector<vector<int>>* x = sACaches[ i ] ;
+			vector<vector<int>>* y = sALRUs[ i ] ;
 
-		for( int i = 0; i < associativity; i++ ) {
-			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
-				minIndex = i ;
+			for( int j = 0; j < associativities[ i ]; j++ ) {
+				if((*y)[ index ][ j ] < (*y)[ index ][ minLRU ]) {
+					minLRU = j ;
+				}
+				if((*x)[ index ][ j ] == tag ) {
+					sAHits[ i ]++ ;
+					(*y)[ index ][ j ] == ++( timer[ i ]) ;
+					found = true ;
+				}
 			}
-			if( cache[ index ][ i ] == tag ) {
-				found = true ;
-				numHits++ ;
-				lru[ index ][ i ] = ++timer ;
-			}
-		}
 
-		if( !found ) {
-			lru[ index ][ minIndex ] = ++timer ;
-			cache[ index ][ minIndex ] = tag ;
+			if( !found ) {
+				(*y)[ index ][ minLRU ] == ++( timer[ i ]) ;
+				(*x)[ index ][ minLRU ] = tag ;
+			}
 		}
 	}
 
 	infile.close() ;
 
-	return( to_string( numHits )) ;
+	ofstream outfile( writeFile ) ;
+	for( int i = 0; i < 3; i++ ) {
+		outfile << to_string( sAHits[ i ]) + "," + to_string( numberLines ) + "; " ;
+	}
+	outfile << to_string( sAHits[ 3 ]) + "," + to_string( numberLines ) + ";" << endl ;
+	outfile.close() ;
 }
 
 //====================== fully assoc ===============================
