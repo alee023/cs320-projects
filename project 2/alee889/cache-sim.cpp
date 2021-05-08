@@ -94,6 +94,45 @@ int sAssoc( int associativity ) {
 	return( numHits - 1 ) ;
 }
 
+//====================== fully assoc ===============================
+int fAssocLRU() {
+	string line, type ;
+	unsigned long long addr ;
+	int numHits = 0 ;		
+	int timer = 0 ;
+	int numBlocks = ( 16 * 1024)/32 ;
+	int cache[ numBlocks ] = {} ;
+	int lru[ numBlocks ] = {} ;
+
+	ifstream infile( readFile ) ;
+	while( getline( infile, line )) {
+		stringstream s( line ) ;
+		s >> type >> hex >> addr ;
+
+		bool found = false ;
+		int minIndex = 0 ;
+		for( int i = 0; i < numBlocks; i++ ) {
+			if( lru[ i ] < lru[ minIndex ]) {
+				minIndex = i ;
+			}
+			if( cache[ i ] == addr / 32 ) {
+				found = true ;
+				numHits++ ;
+				lru[ i ] = ++timer ;
+			}
+		}
+
+		if( !found ) {
+			lru[ minIndex ] = ++timer ;
+			cache[ minIndex ] = addr / 32 ;
+		}
+	}
+
+	infile.close() ;
+
+	return( numHits ) ;
+}
+
 int main( int argc, char *argv[]) {
 	readFile = argv[ 1 ] ;
 	writeFile = argv[ 2 ] ;
