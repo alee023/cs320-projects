@@ -26,9 +26,11 @@ void dMap() {
 		numberLines++ ;
 
 		for( int i = 0; i < 4; i++ ) {
+			int indexBits = log2( dBlocks[ i ]) ;
+			unsigned long long tag = addr >> ( indexBits + 5 ) ; 
 			unsigned long long index = ( addr / 32 ) % dBlocks[ i ] ;
-			if( arrCaches[ i ][ index ] != ( addr / 32 )) {
-				arrCaches[ i ][ index ] = ( addr / 32 ) ;
+			if( arrCaches[ i ][ index ] != tag ) {
+				arrCaches[ i ][ index ] = tag ;
 			}
 			else {
 				dMapHits[ i ]++ ;
@@ -53,7 +55,7 @@ string sAssoc( int associativity ) {
 	int timer = 0 ;
  
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
-	// cout << to_string( numSets ) << endl ;
+	int indexBits = log2( numSets ) ;
 	int cache[ numSets ][ associativity ] ;
 	int lru[ numSets ][ associativity ] ;
 
@@ -70,6 +72,7 @@ string sAssoc( int associativity ) {
 		s >> type >> hex >> addr ;
 
 		int index = ( addr / 32 ) % numSets ;
+		unsigned long long tag = addr >> ( indexBits + 5 ) ;
 		bool found = false ;
 		int minIndex = 0 ;
 
@@ -77,7 +80,7 @@ string sAssoc( int associativity ) {
 			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
 				minIndex = i ;
 			}
-			if( cache[ index ][ i ] == addr / 32 ) {
+			if( cache[ index ][ i ] == tag ) {
 				found = true ;
 				numHits++ ;
 				lru[ index ][ i ] = ++timer ;
@@ -86,7 +89,7 @@ string sAssoc( int associativity ) {
 
 		if( !found ) {
 			lru[ index ][ minIndex ] = ++timer ;
-			cache[ index ][ minIndex ] = addr / 32 ;
+			cache[ index ][ minIndex ] = tag ;
 		}
 	}
 
@@ -146,6 +149,7 @@ string noAlloc( int associativity ) {
 	unsigned long long timer = 0 ;
 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
+	int indexBits = log2( numSets ) ;
 	int cache[ numSets ][ associativity ] ;
 	int lru[ numSets ][ associativity ] ;
 
@@ -162,6 +166,7 @@ string noAlloc( int associativity ) {
 		s >> type >> hex >> addr ;
 
 		int index = ( addr / 32 ) % numSets ;
+		unsigned long long tag = addr >> ( indexBits + 5 ) ;
 		bool found = false ;
 		int minIndex = 0 ;
 
@@ -169,7 +174,7 @@ string noAlloc( int associativity ) {
 			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
 				minIndex = i ;
 			}
-			if( cache[ index ][ i ] == addr / 32 ) {
+			if( cache[ index ][ i ] == tag ) {
 				found = true ;
 				numHits++ ;
 				lru[ index ][ i ] = ++timer ;
@@ -178,7 +183,7 @@ string noAlloc( int associativity ) {
 
 		if( !found && type == "L" ) {
 			lru[ index ][ minIndex ] = ++timer ;
-			cache[ index ][ minIndex ] = addr / 32 ;
+			cache[ index ][ minIndex ] = tag ;
 		}
 	}
 
@@ -195,6 +200,7 @@ string sAssocNL( int associativity ) {
 	unsigned long long timer = 0 ;
 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
+	int indexBits = log2( numSets ) ;
 	int cache[ numSets ][ associativity ] ;
 	int lru[ numSets ][ associativity ] ;
 
@@ -211,6 +217,7 @@ string sAssocNL( int associativity ) {
 		s >> type >> hex >> addr ;
 
 		int index = ( addr / 32 ) % numSets ;
+		unsigned long long tag = addr >> ( indexBits + 5 ) ;
 		bool found = false ;
 		int minIndex = 0 ;
 
@@ -218,7 +225,7 @@ string sAssocNL( int associativity ) {
 			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
 				minIndex = i ;
 			}
-			if( cache[ index ][ i ] == addr / 32 ) {
+			if( cache[ index ][ i ] == tag ) {
 				found = true ;
 				numHits++ ;
 				lru[ index ][ i ] = ++timer ;
@@ -227,18 +234,19 @@ string sAssocNL( int associativity ) {
 
 		if( !found ) {
 			lru[ index ][ minIndex ] = ++timer ;
-			cache[ index ][ minIndex ] = addr / 32 ;
+			cache[ index ][ minIndex ] = tag ;
 		}
 
 		// PREFETCH
 		found = false ;
 		int NLIndex = ( 1 + addr / 32) % numSets ;
+		unsigned long long tag = ( addr + 32 ) >> ( indexBits + 5 ) ;
 		minIndex = 0 ;
 		for( int i = 0; i < associativity; i++ ) {
 			if( lru[ NLIndex ][ i ] < lru[ NLIndex ][ minIndex ]) {
 				minIndex = i ;
 			}
-			if( cache[ NLIndex ][ i ] == 1 + addr / 32 ) {
+			if( cache[ NLIndex ][ i ] == tag ) {
 				found = true ;
 				lru[ NLIndex ][ i ] = ++timer ;
 			}
@@ -246,7 +254,7 @@ string sAssocNL( int associativity ) {
 
 		if( !found ) {
 			lru[ NLIndex ][ minIndex ] = ++timer ;
-			cache[ NLIndex ][ minIndex ] = 1 + addr / 32 ;
+			cache[ NLIndex ][ minIndex ] = tag ;
 		}
 	}
 
@@ -263,6 +271,7 @@ string sAssocMiss( int associativity ) {
 	unsigned long long timer = 0 ;
 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
+	int indexBits = log2( numSets ) ;
 	int cache[ numSets ][ associativity ] ;
 	int lru[ numSets ][ associativity ] ;
 
@@ -279,11 +288,15 @@ string sAssocMiss( int associativity ) {
 		s >> type >> hex >> addr ;
 
 		int index = ( addr / 32 ) % numSets ;
+		unsigned long long tag = addr >> ( indexBits + 5 ) ;
 		bool found = false ;
 		int minIndex = 0 ;
 
 		for( int i = 0; i < associativity; i++ ) {
-			if( cache[ index ][ i ] == addr / 32 ) {
+			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
+				minIndex = i ;
+			}
+			if( cache[ index ][ i ] == tag ) {
 				found = true ;
 				numHits++ ;
 				lru[ index ][ i ] = ++timer ;
@@ -292,24 +305,19 @@ string sAssocMiss( int associativity ) {
 		}
 
 		if( !found ) {
-			for( int i = 0; i < associativity; i++ ) {
-				if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
-					minIndex = i ;
-				}
-			}
-
 			lru[ index ][ minIndex ] = ++timer ;
-			cache[ index ][ minIndex ] = addr / 32 ;
+			cache[ index ][ minIndex ] = tag ;
 
 			// PREFETCH
 			found = false ;
 			int NLIndex = ( 1 + addr / 32) % numSets ;
+			unsigned long long tag = ( addr + 32 ) >> ( indexBits + 5 ) ;
 			minIndex = 0 ;
 			for( int i = 0; i < associativity; i++ ) {
 				if( lru[ NLIndex ][ i ] < lru[ NLIndex ][ minIndex ]) {
 					minIndex = i ;
 				}
-				if( cache[ NLIndex ][ i ] == 1 + addr / 32 ) {
+				if( cache[ NLIndex ][ i ] == tag ) {
 					found = true ;
 					lru[ NLIndex ][ i ] = ++timer ;
 				}
@@ -317,7 +325,7 @@ string sAssocMiss( int associativity ) {
 
 			if( !found ) {
 				lru[ NLIndex ][ minIndex ] = ++timer ;
-				cache[ NLIndex ][ minIndex ] = 1 + addr / 32 ;
+				cache[ NLIndex ][ minIndex ] = tag ;
 			}
 		}
 	}
@@ -339,6 +347,7 @@ int main( int argc, char *argv[]) {
 	outfile << sAssoc( 16 ) + "," + to_string( numberLines ) + ";" << endl ;
 	
 	outfile << fAssocLRU() + "," + to_string( numberLines ) + ";" << endl ;
+	outfile << to_string( 0 ) + "," + to_string( numberLines ) + ";" << endl ;
 
 	outfile << noAlloc( 2 ) + "," + to_string( numberLines ) + "; " ;
 	outfile << noAlloc( 4 ) + "," + to_string( numberLines ) + "; " ;
