@@ -117,20 +117,17 @@ string fAssocLRU() {
 		bool found = false ;
 		int minIndex = 0 ;
 		for( int i = 0; i < 512; i++ ) {
+			if( lru[ i ] < lru[ minIndex ]) {
+				minIndex = i ;
+			}
 			if( cache[ i ] == addr / 32 ) {
 				found = true ;
 				numHits++ ;
 				lru[ i ] = ++timer ;
-				break ;
 			}
 		}
 
 		if( !found ) {
-			for( int i = 0; i < 512; i++ ) {
-				if( lru[ i ] < lru[ minIndex ] ) {
-					minIndex = i ;
-				}
-			}
 			lru[ minIndex ] = ++timer ;
 			cache[ minIndex ] = addr / 32 ;
 		}
@@ -169,21 +166,17 @@ string noAlloc( int associativity ) {
 		int minIndex = 0 ;
 
 		for( int i = 0; i < associativity; i++ ) {
+			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
+				minIndex = i ;
+			}
 			if( cache[ index ][ i ] == addr / 32 ) {
 				found = true ;
 				numHits++ ;
 				lru[ index ][ i ] = ++timer ;
-				break ;
 			}
 		}
 
 		if( !found && type == "L" ) {
-			for( int i = 0; i < associativity; i++ ) {
-				if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
-					minIndex = i ;
-				}
-			}
-
 			lru[ index ][ minIndex ] = ++timer ;
 			cache[ index ][ minIndex ] = addr / 32 ;
 		}
@@ -196,6 +189,74 @@ string noAlloc( int associativity ) {
 
 //=====================set assoc w next line prefetch====================
 string sAssocNL( int associativity ) {
+	string line, type ;
+	unsigned long long addr ;
+	unsigned long long numHits = 0 ;		
+	unsigned long long timer = 0 ;
+
+	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
+	int cache[ numSets ][ associativity ] ;
+	int lru[ numSets ][ associativity ] ;
+
+	for( int i = 0; i < numSets; i++ ) {
+		for( int j = 0; j < associativity; j++ ) {			
+			cache[ i ][ j ] = 0 ;
+			lru[ i ][ j ] = 0 ;
+		}
+	}
+	
+	ifstream infile( readFile ) ;
+	while( getline( infile, line )) {
+		stringstream s( line ) ;
+		s >> type >> hex >> addr ;
+
+		int index = ( addr / 32 ) % numSets ;
+		bool found = false ;
+		int minIndex = 0 ;
+
+		for( int i = 0; i < associativity; i++ ) {
+			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
+				minIndex = i ;
+			}
+			if( cache[ index ][ i ] == addr / 32 ) {
+				found = true ;
+				numHits++ ;
+				lru[ index ][ i ] = ++timer ;
+			}
+		}
+
+		if( !found ) {
+			lru[ index ][ minIndex ] = ++timer ;
+			cache[ index ][ minIndex ] = addr / 32 ;
+		}
+
+		// PREFETCH
+		found = false ;
+		int NLIndex = ( 1 + addr / 32) % numSets ;
+		minIndex = 0 ;
+		for( int i = 0; i < associativity; i++ ) {
+			if( lru[ NLIndex ][ i ] < lru[ NLIndex ][ minIndex ]) {
+				minIndex = i ;
+			}
+			if( cache[ NLIndex ][ i ] == 1 + addr / 32 ) {
+				found = true ;
+				lru[ NLIndex ][ i ] = ++timer ;
+			}
+		}
+
+		if( !found ) {
+			lru[ NLIndex ][ minIndex ] = ++timer ;
+			cache[ NLIndex ][ minIndex ] = 1 + addr / 32 ;
+		}
+	}
+
+	infile.close() ;
+
+	return( to_string( numHits )) ;
+}
+
+//=====================set assoc prefetch on miss========================
+string sAssocMiss( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
 	unsigned long long numHits = 0 ;		
@@ -239,29 +300,25 @@ string sAssocNL( int associativity ) {
 
 			lru[ index ][ minIndex ] = ++timer ;
 			cache[ index ][ minIndex ] = addr / 32 ;
-		}
 
-		// PREFETCH
-		found = false ;
-		int NLIndex = ( 1 + addr / 32) % numSets ;
-		minIndex = 0 ;
-		for( int i = 0; i < associativity; i++ ) {
-			if( cache[ NLIndex ][ i ] == 1 + addr / 32 ) {
-				found = true ;
-				lru[ NLIndex ][ i ] = ++timer ;
-				break ;
-			}
-		}
-
-		if( !found ) {
+			// PREFETCH
+			found = false ;
+			int NLIndex = ( 1 + addr / 32) % numSets ;
+			minIndex = 0 ;
 			for( int i = 0; i < associativity; i++ ) {
 				if( lru[ NLIndex ][ i ] < lru[ NLIndex ][ minIndex ]) {
 					minIndex = i ;
 				}
+				if( cache[ NLIndex ][ i ] == 1 + addr / 32 ) {
+					found = true ;
+					lru[ NLIndex ][ i ] = ++timer ;
+				}
 			}
 
-			lru[ NLIndex ][ minIndex ] = ++timer ;
-			cache[ NLIndex ][ minIndex ] = 1 + addr / 32 ;
+			if( !found ) {
+				lru[ NLIndex ][ minIndex ] = ++timer ;
+				cache[ NLIndex ][ minIndex ] = 1 + addr / 32 ;
+			}
 		}
 	}
 
@@ -293,6 +350,10 @@ int main( int argc, char *argv[]) {
 	outfile << sAssocNL( 8 ) + "," + to_string( numberLines ) + "; " ;
 	outfile << sAssocNL( 16 ) + "," + to_string( numberLines ) + ";" << endl ;
 
+	outfile << sAssocMiss( 2 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << sAssocMiss( 4 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << sAssocMiss( 8 ) + "," + to_string( numberLines ) + "; " ;
+	outfile << sAssocMiss( 16 ) + "," + to_string( numberLines ) + ";" << endl ;
 
 	outfile.close() ;
 	return 0;
