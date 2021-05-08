@@ -240,7 +240,7 @@ string sAssocNL( int associativity ) {
 		// PREFETCH
 		found = false ;
 		int NLIndex = ( 1 + addr / 32) % numSets ;
-		unsigned long long tag = ( addr + 32 ) >> ( indexBits + 5 ) ;
+		tag = ( addr + 32 ) >> ( indexBits + 5 ) ;
 		minIndex = 0 ;
 		for( int i = 0; i < associativity; i++ ) {
 			if( lru[ NLIndex ][ i ] < lru[ NLIndex ][ minIndex ]) {
@@ -311,7 +311,7 @@ string sAssocMiss( int associativity ) {
 			// PREFETCH
 			found = false ;
 			int NLIndex = ( 1 + addr / 32) % numSets ;
-			unsigned long long tag = ( addr + 32 ) >> ( indexBits + 5 ) ;
+			tag = ( addr + 32 ) >> ( indexBits + 5 ) ;
 			minIndex = 0 ;
 			for( int i = 0; i < associativity; i++ ) {
 				if( lru[ NLIndex ][ i ] < lru[ NLIndex ][ minIndex ]) {
