@@ -49,9 +49,9 @@ void dMap() {
 int sAssoc( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
-	int numHits = 0 ;		
-	int timer = 0 ;
-
+	unsigned long long numHits = 0 ;		
+	unsigned long long timer = 0 ;
+ 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
 	// cout << to_string( numSets ) << endl ;
 	int cache[ numSets ][ associativity ] ;
@@ -76,7 +76,7 @@ int sAssoc( int associativity ) {
 			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
 				minIndex = i ;
 			}
-			if( cache[ index ][ i ] ==  addr / 32 ) {
+			if( cache[ index ][ i ] == addr / 32 ) {
 				found = true ;
 				numHits++ ;
 				lru[ index ][ i ] = ++timer ;
@@ -91,15 +91,15 @@ int sAssoc( int associativity ) {
 
 	infile.close() ;
 
-	return( numHits - 1 ) ;
+	return( numHits ) ;
 }
 
 //====================== fully assoc ===============================
 int fAssocLRU() {
 	string line, type ;
 	unsigned long long addr ;
-	int numHits = 0 ;		
-	int timer = 0 ;
+	unsigned long long numHits = 0 ;		
+	unsigned long long timer = 0 ;
 	int cache[ 512 ] ;
 	int lru[ 512 ] ;
 
@@ -143,8 +143,8 @@ int fAssocLRU() {
 int noAlloc( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
-	int numHits = 0 ;		
-	int timer = 0 ;
+	unsigned long long numHits = 0 ;		
+	unsigned long long timer = 0 ;
 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
 	int cache[ numSets ][ associativity ] ;
