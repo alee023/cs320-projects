@@ -91,9 +91,7 @@ int sAssoc( int associativity ) {
 
 	infile.close() ;
 
-	ofstream outfile( writeFile ) ;
-	outfile << to_string( numHits ) + "," + to_string( numberLines ) + ";" << endl ;
-	outfile.close() ;
+	return( numHits - 1 ) ;
 }
 
 //====================== fully assoc ===============================
@@ -132,7 +130,9 @@ void fAssocLRU() {
 
 	infile.close() ;
 
-	return( numHits ) ;
+	ofstream outfile( writeFile ) ;
+	outfile << to_string( numHits ) + "," + to_string( numberLines ) + ";" << endl ;
+	outfile.close() ;
 }
 
 int main( int argc, char *argv[]) {
