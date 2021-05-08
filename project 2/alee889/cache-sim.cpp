@@ -48,65 +48,54 @@ void dMap() {
 }
 
 //=========================set assoc ==================================
-void sAssoc() {
+string sAssoc( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
-	int timer[ 4 ] = { 0, 0, 0, 0 } ;
- 	int associativities[ 4 ] = { 2, 4, 8, 16 } ;
-	int sASets[ 4 ] = { 256, 128, 64, 32 } ;
-	int sAHits[ 4 ] = { 0, 0, 0, 0 } ;
-
+	int numHits = 0 ;		
+	int clock = 0 ;
+ 
+	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
 	int indexBits = log2( numSets ) ;
-	vector<vector<int>> twoAssoc( 256, vector<int> ( 2, 0 )) ;
-	vector<vector<int>> fourAssoc( 128, vector<int> ( 4, 0 )) ;
-	vector<vector<int>> eightAssoc( 64, vector<int> ( 8, 0 )) ;
-	vector<vector<int>> sixteenAssoc( 32, vector<int> ( 16, 0 )) ;
-	vector<vector<vector<int>>*> sACaches{ &twoAssoc, &fourAssoc, &eightAssoc, &sixteenAssoc } ;
-	vector<vector<int>> twoALRU( 256, vector<int> ( 2, 0 ));
-	vector<vector<int>> fourALRU( 128, vector<int> ( 4, 0 )) ;
-	vector<vector<int>> eightALRU( 64, vector<int> ( 8, 0 )) ;
-	vector<vector<int>> sixteenALRU( 32, vector<int> ( 16, 0 )) ;
-	vector<vector<vector<int>>*> sALRUs{ &twoALRU, &fourALRU, &eightALRU, &sixteenALRU } ;
+	int cache[ numSets ][ associativity ] ;
+	int lru[ numSets ][ associativity ] ;
+
+	for( int i = 0; i < numSets; i++ ) {
+		for( int j = 0; j < associativity; j++ ) {
+			cache[ i ][ j ] = 0 ;
+			lru[ i ][ j ] = 0 ;
+		}
+	}
 	
 	ifstream infile( readFile ) ;
 	while( getline( infile, line )) {
 		stringstream s( line ) ;
 		s >> type >> hex >> addr ;
 
-		for( int i = 0; i < 4; i++ ) {
-			unsigned long long index = ( addr / 32 ) % sASets[ i ] ;
-			unsigned long long tag = addr >> ( log2( sASets[ i ] ) + 5 ) ;
-			bool found = false ;
-			int minLRU = 0;
-			vector<vector<int>>* x = sACaches[ i ] ;
-			vector<vector<int>>* y = sALRUs[ i ] ;
+		int index = ( addr / 32 ) % numSets ;
+		unsigned long long tag = addr >> ( indexBits + 5 ) ;
+		bool found = false ;
+		int minIndex = 0 ;
 
-			for( int j = 0; j < associativities[ i ]; j++ ) {
-				if((*y)[ index ][ j ] < (*y)[ index ][ minLRU ]) {
-					minLRU = j ;
-				}
-				if((*x)[ index ][ j ] == tag ) {
-					sAHits[ i ]++ ;
-					(*y)[ index ][ j ] == ++( timer[ i ]) ;
-					found = true ;
-				}
+		for( int i = 0; i < associativity; i++ ) {
+			if( lru[ index ][ i ] < lru[ index ][ minIndex ]) {
+				minIndex = i ;
 			}
+			if( cache[ index ][ i ] == tag ) {
+				found = true ;
+				numHits++ ;
+				lru[ index ][ i ] = ++clock ;
+			}
+		}
 
-			if( !found ) {
-				(*y)[ index ][ minLRU ] == ++( timer[ i ]) ;
-				(*x)[ index ][ minLRU ] = tag ;
-			}
+		if( !found ) {
+			lru[ index ][ minIndex ] = ++clock ;
+			cache[ index ][ minIndex ] = tag ;
 		}
 	}
 
 	infile.close() ;
 
-	ofstream outfile( writeFile ) ;
-	for( int i = 0; i < 3; i++ ) {
-		outfile << to_string( sAHits[ i ]) + "," + to_string( numberLines ) + "; " ;
-	}
-	outfile << to_string( sAHits[ 3 ]) + "," + to_string( numberLines ) + ";" << endl ;
-	outfile.close() ;
+	return( to_string( numHits )) ;
 }
 
 //====================== fully assoc ===============================
@@ -114,7 +103,7 @@ string fAssocLRU() {
 	string line, type ;
 	unsigned long long addr ;
 	unsigned long long numHits = 0 ;		
-	unsigned long long timer = 0 ;
+	unsigned long long clock = 0 ;
 	int cache[ 512 ] ;
 	int lru[ 512 ] ;
 
@@ -137,12 +126,12 @@ string fAssocLRU() {
 			if( cache[ i ] == addr / 32 ) {
 				found = true ;
 				numHits++ ;
-				lru[ i ] = ++timer ;
+				lru[ i ] = ++clock ;
 			}
 		}
 
 		if( !found ) {
-			lru[ minIndex ] = ++timer ;
+			lru[ minIndex ] = ++clock ;
 			cache[ minIndex ] = addr / 32 ;
 		}
 	}
@@ -157,7 +146,7 @@ string noAlloc( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
 	unsigned long long numHits = 0 ;		
-	unsigned long long timer = 0 ;
+	unsigned long long clock = 0 ;
 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
 	int indexBits = log2( numSets ) ;
@@ -188,12 +177,12 @@ string noAlloc( int associativity ) {
 			if( cache[ index ][ i ] == tag ) {
 				found = true ;
 				numHits++ ;
-				lru[ index ][ i ] = ++timer ;
+				lru[ index ][ i ] = ++clock ;
 			}
 		}
 
 		if( !found && type == "L" ) {
-			lru[ index ][ minIndex ] = ++timer ;
+			lru[ index ][ minIndex ] = ++clock ;
 			cache[ index ][ minIndex ] = tag ;
 		}
 	}
@@ -208,7 +197,7 @@ string sAssocNL( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
 	unsigned long long numHits = 0 ;		
-	unsigned long long timer = 0 ;
+	unsigned long long clock = 0 ;
 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
 	int indexBits = log2( numSets ) ;
@@ -239,12 +228,12 @@ string sAssocNL( int associativity ) {
 			if( cache[ index ][ i ] == tag ) {
 				found = true ;
 				numHits++ ;
-				lru[ index ][ i ] = ++timer ;
+				lru[ index ][ i ] = ++clock ;
 			}
 		}
 
 		if( !found ) {
-			lru[ index ][ minIndex ] = ++timer ;
+			lru[ index ][ minIndex ] = ++clock ;
 			cache[ index ][ minIndex ] = tag ;
 		}
 
@@ -259,12 +248,12 @@ string sAssocNL( int associativity ) {
 			}
 			if( cache[ NLIndex ][ i ] == tag ) {
 				found = true ;
-				lru[ NLIndex ][ i ] = ++timer ;
+				lru[ NLIndex ][ i ] = ++clock ;
 			}
 		}
 
 		if( !found ) {
-			lru[ NLIndex ][ minIndex ] = ++timer ;
+			lru[ NLIndex ][ minIndex ] = ++clock ;
 			cache[ NLIndex ][ minIndex ] = tag ;
 		}
 	}
@@ -279,7 +268,7 @@ string sAssocMiss( int associativity ) {
 	string line, type ;
 	unsigned long long addr ;
 	unsigned long long numHits = 0 ;		
-	unsigned long long timer = 0 ;
+	unsigned long long clock = 0 ;
 
 	int numSets = ( 16 * 1024 )/( associativity * 32 ) ;
 	int indexBits = log2( numSets ) ;
@@ -310,13 +299,13 @@ string sAssocMiss( int associativity ) {
 			if( cache[ index ][ i ] == tag ) {
 				found = true ;
 				numHits++ ;
-				lru[ index ][ i ] = ++timer ;
+				lru[ index ][ i ] = ++clock ;
 				break ;
 			}
 		}
 
 		if( !found ) {
-			lru[ index ][ minIndex ] = ++timer ;
+			lru[ index ][ minIndex ] = ++clock ;
 			cache[ index ][ minIndex ] = tag ;
 
 			// PREFETCH
@@ -330,12 +319,12 @@ string sAssocMiss( int associativity ) {
 				}
 				if( cache[ NLIndex ][ i ] == tag ) {
 					found = true ;
-					lru[ NLIndex ][ i ] = ++timer ;
+					lru[ NLIndex ][ i ] = ++clock ;
 				}
 			}
 
 			if( !found ) {
-				lru[ NLIndex ][ minIndex ] = ++timer ;
+				lru[ NLIndex ][ minIndex ] = ++clock ;
 				cache[ NLIndex ][ minIndex ] = tag ;
 			}
 		}
